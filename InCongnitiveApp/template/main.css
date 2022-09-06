@@ -1,0 +1,28 @@
+.bk-root .bk-btn-success {
+color: #FDFEFE;
+background-color: #9CAB35;
+border-color: #9CAB35;
+}
+.bk-root .bk-btn-success:focus {
+color: #FDFEFE;
+background-color: #9CAB35;
+border-color: #9CAB35;
+}
+.bk-root .bk-btn-success:active {
+color: #FDFEFE;
+background-color: #9CAB35;
+border-color: #9CAB35;
+}
+.bk-root .bk-btn-success:hover {
+color: #FDFEFE;
+background-color: #7F8C2C;
+border-color: #7F8C2C;
+}
+
+a {
+color: #7F8C2C;
+}
+
+a:hover {
+color: #636D22;
+}

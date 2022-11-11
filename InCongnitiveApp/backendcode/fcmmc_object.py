@@ -1,26 +1,30 @@
 # fcmmc_object.py
 
-"""This module provides the class, 'MCarloFcm', whose objects are
-used for the combination of FCM simulation [1] and the Monte Carlo
-Simulation (MCS) procedure. This combination can examine the
-uncertainty propagation all the way to the FCM layout. Possible
-uncertainty sources are the weights values and the values of the
-input nodes. Because, the range of both sources is [-1, 1], when
-the MCS is used, they considerd to be Random Variables (RV) with
-Beta distribution to quarantee that the support of their distribution
-lies in [-1, 1].
+"""This module provides the class, 'MCarloFcm',
+whose objects utilised to combine the FCM simulation [1]
+with the Monte Carlo Simulation (MCS) aproach.
+By doing so, the analyst is capable to explore the
+uncertainty propagation through the FCM layout.
 
-The class method 'fcm_mc_execute' can handle the following four
+The sources of uncertainty are:
+i. the weights values of node interconnections and
+ii. the values of the input nodes.
+
+When the weights and input values are considered random
+variables (i.e. MCS execution), we assume Beta distributions
+for all these random variables to quarantee that the support
+of their distribution lies in a closed interval.
+
+The 'fcm_mc_execute' class method can handle the following four
 (4) cases:
-    - Case 1 : No variation for both weights and values of the
-    input nodes.
-    - Case 2 : Variation on values of input nodes only.
-    Weights are constant
-    - Case 3 : Variation on weights values only.
-    The input node values are constant.
-    - Case 4 : Both weights and values of the input values are
-    random variables.
+- Case 1 : No variation for both weights and input node values.
+- Case 2 : Variation on input node values only. Weights are constant.
+- Case 3 : Variation on weights values only. The input node are
+           constant.
+- Case 4 : Both weights and input node values are random variables.
 
+* [1] 'Parameter analysis for sigmoid and hyperbolic transfer functions
+of fuzzy cognitive maps', https://doi.org/10.1007/s12351-022-00717-x
 """
 
 __all__ = ('MCarloFcm', )
@@ -30,77 +34,73 @@ from re import M
 import pandas as pd
 import numpy as np
 
-from backendcode.fcm_simulator import execute_siluation
+from backendcode.fcm_simulator import exec_fcm_simulation
 from backendcode.fcm_layout_parameters import select_lambda
 
 
 class MCarloFcm(object):
-    """This class is used to combine the FCM simulation [1]
-    and the Monte Carlo Simulation (MCS) procedure.
+    """This class is used to combine the FCM simulation [1] and the
+    Monte Carlo Simulation (MCS) procedure.
 
     Attributes
     ----------
-    INPUTS_SD :
-        the standard deviation (sd) of the input nodes values.
-        zero if the values of input nodes are considered constant.
-    WEIGHTS_SD :
-        the standard deviation (sd) of the weights values.
-        zero if the weights are considered constant.
+    INPUTS_SD : float
+        the standard deviation (sd) of input node values.
+        zero if the input node values are constant.
+    WEIGHTS_SD : float
+        the standard deviation (sd) of weights values.
+        zero if the weights are constant.
     INPUTS_ITERATIONS : int
-        number of Monte Carlo iterations considering that
-        the values of the input nodes are random variables.
-        Instead, if INPUTS_ITERATIONS=0 or INPUTS_ITERATIONS=1
-        the values of input nodes are constants.
+        the number of Monte Carlo iterations considering the input
+        nodes ss random variables. Conversely, If INPUTS_ITERATIONS=0
+        or INPUTS_ITERATIONS=1, the values of input nodes are constants
+        during all MCS iterations.
     WEIGHTS_ITERATIONS :
         the number of Monte Carlo iterations considering
-        that the weigth values are random variables. Instead,
-        if WEIGHTS_ITERATIONS=0 or WEIGHTS_ITERATIONS=1 the
-        values of weights are constants.
+        the weigths values as random variables. Conversly,
+        if WEIGHTS_ITERATIONS=0 or WEIGHTS_ITERATIONS=1, the
+        weights are constants during all MCS iterations.
     VARIANCE_ON_ZERO_WEIGHTS : bool
-        default valued = True. if True the zero weights are considered
-        random distribution with mean zero valued. otherwies, if False,
-        the weights are constant and the zero value indicate non
-        correlation between the nodes of the edge.
+        default valued = True. if 'True', the zero valued weights are
+        random variables with mean=0. Otherwies, if 'False', the zero
+        valued weights are constant and their value indicate absence
+        of correlation between the nodes of the corresponding edge.
     fcm_obj: FCMap object
-        see module fcm_onject.py
+        see module 'fcm_onject.py'
     activation_function_name : str
-        the accepted values are 'sigmoid' and 'hyperbolic'.
+        valid values 'sigmoid' and 'hyperbolic', only.
     output_nodes_values : dict of lists
-        the ensamble of the final values per MCS iteration
-        of the output nodes.
+        the ensamble of the final values of the output nodes, per MCS
+        iteration.
     intermediate_nodes_values :
-        the ensamble of the final values per MCS iteration
-        of the intermediate nodes.
+        the ensamble of the final values of the intermediate nodes, per
+        MCS iteration.
     input_nodes_values :
-        the ensamble of the final values per MCS iteration
-        of the input nodes.
+        the ensamble of the final values  of the input nodes, per MCS
+        iteration.
     lamda : float
-        the lambda parameter value to be used if
-        lambda_autoselect=False.
+        the lambda parameter value to be used if lambda_autoselect=False.
     lambda_autoselect : bool
-        True of the user wants the app to choose the lambda
-        paremeter of the FCM tranfer function based on [1].
+        True if the user wants the app to auto-select the
+        paremeter lambda of the FCM tranfer function based on [1].
     baseline_input_node_values : dict
-        a dictionary which contains the normilised [2] final
-        values of the input nodes when all FCM parameters
-        (values of input node and weights) are constant.
+        a dictionary which contains the normilised [2] final values of
+        the input nodes when all FCM parameters (values of input node
+        and weights) are constant.
     baseline_output_nodes_values : dict
-        a dictionary which contains the normilised [2] final
-        values of the output nodes when all FCM parameters
-        (values of input node and weights) are constant.
+        a dictionary which contains the normilised [2] final values
+        of the output nodes when all FCM parameters (values of input
+        node and weights) are constant.
     baseline_intermediate_node_values : dict
-        a dictionary which contains the normilised [2] final
-        values of the intermediate nodes when all FCM parameters
-        (values of input node and weights) are constant.
+        a dictionary which contains the normilised [2] final values
+        of the intermediate nodes when all FCM parameters (values
+        of input node and weights) are constant.
 
+    * [1] 'Parameter analysis for sigmoid and hyperbolic transfer functions
+    of fuzzy cognitive maps', https://doi.org/10.1007/s12351-022-00717-x
 
-    * [1] 'Parameter analysis for sigmoid and
-    hyperbolic transfer functions of fuzzy cognitive maps',
-    https://doi.org/10.1007/s12351-022-00717-x
-
-    * [2] 'Normalising the Output of Fuzzy Cognitive Maps'
-    IISA-2022 Confernece.
-
+    * [2] 'Normalising the Output of Fuzzy Cognitive Maps' IISA-2022
+    Confernece.
 
     """
 
@@ -114,7 +114,6 @@ class MCarloFcm(object):
     """The number of created MCarloFcm instances.
     """
 
-
     def __new__(cls,*args,**kwargs):
         '''Creates a new FCMap object and checks if there is already
         one in memory. If so, it raises an Exception.'''
@@ -127,7 +126,6 @@ class MCarloFcm(object):
             return
         else:
             return super(MCarloFcm, cls).__new__(cls)
-
 
     # Initialize new object
     def __init__(
@@ -196,7 +194,6 @@ class MCarloFcm(object):
         self.intermediate_nodes_values = {k:[] for k in fcm_obj.intermediate_nodes}
         self.input_nodes_values = {k:[] for k in fcm_obj.input_nodes}
 
-
         if N_WEIGHTS>1:
             self.lamda, self.lambda_autoselect  = select_lambda(
                 self.fcm_obj.w_matrix,
@@ -235,10 +232,9 @@ class MCarloFcm(object):
 
         return _b
 
-
-    # Monte Carlo generator when inputs are variants
+    # Monte Carlo generator when inputs are variables
     def _var_input_mc_gen(self, fcm_object):
-        """Deployment of Case 2.
+        """Case 2 deployment.
         """
 
         for i in range(self.INPUTS_ITERATIONS):
@@ -290,7 +286,7 @@ class MCarloFcm(object):
                 normilised_intermediate_final_values,
                 normilised_intermediate_df,
                 normilised_output_df,
-            ) = execute_siluation(
+            ) = exec_fcm_simulation(
                 Ao,
                 Arguments,
                 fcm_object.input_nodes,
@@ -358,7 +354,7 @@ class MCarloFcm(object):
 
     # Monte Carlo generator when weights are variant
     def _var_weights_mc_gen(self, fcm_object):
-        """Deployment of Case 3
+        """Case 3 deployment
         """
 
         _w_matrix = fcm_object.w_matrix
@@ -380,7 +376,7 @@ class MCarloFcm(object):
                 normilised_intermediate_final_values,
                 normilised_intermediate_df,
                 normilised_output_df,
-            ) = execute_siluation(
+            ) = exec_fcm_simulation(
                 Ao,
                 Arguments,
                 fcm_object.input_nodes,
@@ -413,7 +409,7 @@ class MCarloFcm(object):
 
 
     def _var_inputs_n_weights_mc_gen(self, fcm_object):
-        """Deployment of Case 4
+        """Case 4 deployment
         """
 
         _w_matrix = fcm_object.w_matrix
@@ -470,7 +466,7 @@ class MCarloFcm(object):
                 normilised_intermediate_final_values,
                 normilised_intermediate_df,
                 normilised_output_df,
-            ) = execute_siluation(
+            ) = exec_fcm_simulation(
                 Ao,
                 Arguments,
                 fcm_object.input_nodes,
@@ -500,25 +496,21 @@ class MCarloFcm(object):
         FCM simulation and the Monte Carlo Simulation.
 
         The following cases are deployed:
-            - Case 1 : No variation for both weights and values
-                       of theinput nodes.
-            - Case 2 : Variation on values of input nodes only.
-                       Weights are constant
-            - Case 3 : Variation on weights values only.
-                       The input node values are constant.
-            - Case 4 : Both weights and values of the input
-                       values are random variables.
+            - Case 1 : No variation for both weights and input node values.
+            - Case 2 : Variation on input node values only. Weights are constant.
+            - Case 3 : Variation on weights values only. The input node are constant.
+            - Case 4 : Both weights and input node values are random variables.
 
         Parameters
         ----------
         fcm_layout_dict
-            thecore dictionary of the InCofnitive app. It contains the
+            the core dictionary of the InCofnitive app. It contains
             most of the necessary info of the FCM layout.
 
         Returns
         -------
         None
-            The results are stored to the atribbutes of the FCM
+            The results are stored to the atribbutes of the FCM object
 
         """
 
@@ -536,7 +528,7 @@ class MCarloFcm(object):
                 normilised_intermediate_final_values,
                 normilised_intermediate_df,
                 normilised_output_df,
-            ) = execute_siluation(
+            ) = exec_fcm_simulation(
                 Ao,
                 Arguments,
                 fcm_object.input_nodes,
@@ -589,7 +581,7 @@ class MCarloFcm(object):
                 baseline_normilised_intermediate_final_values,
                 baseline_normilised_intermediate_df,
                 baseline_normilised_output_df,
-            ) = execute_siluation(
+            ) = exec_fcm_simulation(
                 Ao,
                 Arguments,
                 fcm_object.input_nodes,
@@ -632,7 +624,7 @@ class MCarloFcm(object):
                 baseline_normilised_intermediate_final_values,
                 baseline_normilised_intermediate_df,
                 baseline_normilised_output_df,
-            ) = execute_siluation(
+            ) = exec_fcm_simulation(
                 Ao,
                 Arguments,
                 fcm_object.input_nodes,
@@ -675,7 +667,7 @@ class MCarloFcm(object):
                 baseline_normilised_intermediate_final_values,
                 baseline_normilised_intermediate_df,
                 baseline_normilised_output_df,
-            ) = execute_siluation(
+            ) = exec_fcm_simulation(
                 Ao,
                 Arguments,
                 fcm_object.input_nodes,

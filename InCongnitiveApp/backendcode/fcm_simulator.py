@@ -23,7 +23,7 @@ of fuzzy cognitive maps', https://doi.org/10.1007/s12351-022-00717-x
 
 """
 
-__all__ = ('execute_siluation')
+__all__ = ('exec_fcm_simulation')
 
 
 import pandas as pd
@@ -208,7 +208,7 @@ def _create_outcomes_dframes(nodes_order, input_nodes, output_nodes, A):
 
 ########################################################
 
-def execute_siluation(
+def exec_fcm_simulation(
     A,
     Arguments,
     input_nodes,

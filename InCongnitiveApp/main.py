@@ -2,8 +2,6 @@
 
 # general imports
 import os
-import bisect
-import numpy as np
 from functools import partial
 
 # bokeh & holoviews imports
@@ -12,32 +10,20 @@ import holoviews as hv
 hv.extension('bokeh')
 
 from bokeh.io import curdoc
-from bokeh.layouts import layout, column, row
-from bokeh.plotting import figure
-from bokeh.models.widgets import FileInput
-from bokeh.models import (
-    Div, ColumnDataSource, Button,
-    Spinner, CheckboxGroup, Select,
-    Panel, Tabs, FactorRange, TableColumn,
-    DataTable, BoxZoomTool, PanTool, ResetTool,
-    HoverTool, TapTool, WheelZoomTool, SaveTool,
-)
+from bokeh.models import ColumnDataSource
 
 # import internal modules
-from backendcode.fcmmc_simulation import monte_carlo_simulation
-
 from frontendcode._widgets import *
 from frontendcode._callbacks import *
-from frontendcode._internal_functions import (
-    _plot_results, _update_graph_renderer,
-    _display_msg, _display_lambda
-)
+from frontendcode._internal_functions import update_graph_renderer
+from frontendcode._web_page_layout import web_page_layout
 
 
 # ---------------------------------------------------------------------
-# Apps variables   ----------------------------------------------------
+# Sessions variables   ------------------------------------------------
 # ---------------------------------------------------------------------
 
+# Assign the seesion vars to the current Doc
 current_doc = curdoc()
 
 current_doc.fcm_layout_dict = {
@@ -72,74 +58,8 @@ current_doc.output_nodes_CDS = ColumnDataSource()
 
 current_doc.output_nodes_mc_values = {}
 
-
-
 # ---------------------------------------------------------------------
-# Webpage layout  --- -------------------------------------------------
-# ---------------------------------------------------------------------
-
-# FCM plot and tables display:
-fcm_display_layout = layout(
-    row(
-        fcm_plot,
-        column(
-            separator(width=550, height=15),
-            upload_xlsx_wgt,
-            excel_parse_msg_div,
-            separator(width=550, height=15),
-            row(
-                column(nodes_data_table_title, nodes_data_table),
-                column(edges_data_table_title, edges_data_table),
-            ),
-        )
-    )
-)
-
-# Simulation layout:
-input_nodes_layout = layout(
-    separator(width=550, height=15),
-    variable_input_nodes_rb,
-    [iter_on_input_nodes_spinner, input_nodes_sd_spinner],
-    separator(width=550, height=15)
-)
-weights_layout = layout(
-    separator(width=550, height=15),
-    variable_weights_rb,
-    [iter_on_weights_spinner, weight_sd_spinner],
-    variable_zero_weights_rb,
-    separator(width=550, height=15)
-)
-lambda_layout = layout(
-    separator(width=550, height=15),
-    lambda_autoselect_rb,
-    [lambda_spinner, tr_function_select],
-    separator(width=550, height=15)
-)
-simulation_parameters_layout = layout(
-    input_nodes_layout,
-    weights_layout,
-    lambda_layout,
-    separator(width=550, height=15),
-    alert_msg_div,
-    execute_btn,
-    separator(width=550, height=15),
-)
-results_layout = layout(
-    column(tabs, lambda_div, extract_btn))
-
-# Parent layout:
-web_page_layout = layout(
-    page_header,
-    separator(width=1500, height=15),
-    fcm_display_layout,
-    separator(width=1500, height=15),
-    [simulation_parameters_layout, results_layout],
-    separator(width=1500, height=15),
-    [acknowledgements, license, github_repo],
-)
-
-# ---------------------------------------------------------------------
-# Assign callbacks on widgets    --------------------------------------
+# Attach callbacks on widgets    --------------------------------------
 # ---------------------------------------------------------------------
 
 upload_xlsx_cb = partial(_get_xlsx, doc=current_doc)
@@ -178,7 +98,21 @@ variable_zero_weights_rb.on_click(_are_zero_weights_rand_var)
 clear_allert_msg_div_cb = partial(_clear_allert_msg_div, doc=current_doc)
 fcm_plot.on_change('renderers', clear_allert_msg_div_cb)
 
-execute_btn.on_click(collect_global_var)
+execute_btn.on_click(_collect_global_var)
+
+# ---------------------------------------------------------------------
+# Initialize doc   ----------------------------------------------------
+# ---------------------------------------------------------------------
+
+#Updatate the FCM figure renderers for the 1st time:
+(
+    graph_renderer,
+    labels_renderer
+) = update_graph_renderer(
+    current_doc.fcm_layout_dict
+)
+fcm_plot.renderers = []
+fcm_plot.renderers = [graph_renderer, labels_renderer]
 
 # ---------------------------------------------------------------------
 # Run bokeh server   --------------------------------------------------

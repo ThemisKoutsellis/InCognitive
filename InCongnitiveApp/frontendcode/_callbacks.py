@@ -1,12 +1,17 @@
 # _callbacks.py
 
 import io
-
+import bisect
+import numpy as np
 from base64 import b64decode
 from functools import partial
 
+# import internal modules
+from backendcode.fcmmc_simulation import monte_carlo_simulation
 from frontendcode._parsers import parse_input_xlsx
-from frontendcode._internal_functions import _display_msg
+from frontendcode._internal_functions import (
+    plot_results, display_msg, display_lambda,)
+
 
 __all__ = (
     '_set_iter_when_weights_vary',
@@ -21,12 +26,13 @@ __all__ = (
     '_set_weights_sd',
     '_are_zero_weights_rand_var',
     '_clear_allert_msg_div',
+    '_collect_global_var'
 )
 
 # clear msg div
 def _clear_msg_div(doc, div):
     msg_cb = partial(
-        _display_msg,
+        display_msg,
         doc=doc,
         div=div,
         msg=' ',
@@ -211,18 +217,24 @@ def _clear_allert_msg_div(attr, old, new, doc):
     doc.set_select({'name': 'alert_msg_div'}, {'text': ' '})
 
 #######################################################################
-def collect_global_var():
+def _collect_global_var(doc):
 
-    global f1, f2, f3
+    f1 = doc.get_model_by_name('f1')
+    f2 = doc.get_model_by_name('f2')
+    f3 = doc.get_model_by_name('f3')
+
+    lambda_div = doc.get_model_by_name('lambda_div')
+    alert_msg_div = doc.get_model_by_name('alert_msg_div')
+    upload_xlsx_wgt = doc.get_model_by_name('upload_xlsx_wgt')
 
     f1.renderers = []
     f2.renderers = []
     f3.renderers = []
 
-    current_doc.add_next_tick_callback(
+    doc.add_next_tick_callback(
         partial(
-            _display_msg,
-            doc=current_doc,
+            display_msg,
+            doc=doc,
             div=alert_msg_div,
             msg=' ',
             msg_type='alert',
@@ -230,28 +242,29 @@ def collect_global_var():
     )
 
     error1 = not bool(upload_xlsx_wgt.filename)
-    error2 = not bool(current_doc.fcm_layout_dict)
+    error2 = not bool(doc.fcm_layout_dict)
     if not error2:
-        error3 = not bool(current_doc.fcm_layout_dict['source_nodes'])
+        error3 = not bool(doc.fcm_layout_dict['source_nodes'])
     else:
         error3 = True
 
     _expr = error1 or error2 or error3
     if _expr:
 
-        _error_str = '[Error]: There is no input excel file OR the excel file is erroneous!'
-        current_doc.add_next_tick_callback(
+        _error_str = ('[Error]: There is no input excel'
+                      ' file OR the excel file is erroneous!')
+        doc.add_next_tick_callback(
             partial(
-                _display_msg,
-                doc=current_doc,
+                display_msg,
+                doc=doc,
                 div=alert_msg_div,
                 msg=_error_str,
                 msg_type='error'
             )
         )
     else:
-        _expr1 = current_doc.iter_on_input_nodes == current_doc.iter_on_weights
-        _expr2 = (current_doc.iter_on_input_nodes < 2) or (current_doc.iter_on_weights < 2)
+        _expr1 = doc.iter_on_input_nodes == doc.iter_on_weights
+        _expr2 = (doc.iter_on_input_nodes < 2) or (doc.iter_on_weights < 2)
 
         if _expr1 or _expr2:
             # Monte Carlo Simulation
@@ -264,15 +277,15 @@ def collect_global_var():
             baseline_output_nodes_values,
             baseline_intermediate_nodes_values,
             )=monte_carlo_simulation(
-                current_doc.fcm_layout_dict,
-                current_doc.iter_on_input_nodes,
-                current_doc.iter_on_weights,
-                current_doc.input_nodes_sd,
-                current_doc.weights_sd,
-                current_doc.zero_weights_are_rand_var,
-                current_doc.trans_func,
-                current_doc.lamda,
-                current_doc.autoslect_lambda,
+                doc.fcm_layout_dict,
+                doc.iter_on_input_nodes,
+                doc.iter_on_weights,
+                doc.input_nodes_sd,
+                doc.weights_sd,
+                doc.zero_weights_are_rand_var,
+                doc.trans_func,
+                doc.lamda,
+                doc.autoslect_lambda,
             )
 
 
@@ -291,12 +304,12 @@ def collect_global_var():
 
             N = 600
 
-            if current_doc.trans_func == 'sigmoid':
+            if doc.trans_func == 'sigmoid':
                 _x = list(np.linspace(0, 1, N))
                 bisect.insort(_x, 0.5)
                 _set_x_range(0,1)
 
-            elif current_doc.trans_func == 'hyperbolic':
+            elif doc.trans_func == 'hyperbolic':
                 _x = list(np.linspace(-1, 1, N))
                 bisect.insort(_x, 0)
                 _set_x_range(-1,1)
@@ -305,23 +318,23 @@ def collect_global_var():
             #   Plot Figure 1,2 & 3
             # ------------------------
 
-            _plot_results(f1, _x, input_nodes_mc_values, baseline_input_nodes_values)
-            _plot_results(f2, _x, intermediate_nodes_mc_values, baseline_intermediate_nodes_values)
-            _plot_results(f3, _x, output_nodes_mc_values, baseline_output_nodes_values)
+            plot_results(f1, _x, input_nodes_mc_values, baseline_input_nodes_values)
+            plot_results(f2, _x, intermediate_nodes_mc_values, baseline_intermediate_nodes_values)
+            plot_results(f3, _x, output_nodes_mc_values, baseline_output_nodes_values)
 
-            current_doc.add_next_tick_callback(
+            doc.add_next_tick_callback(
                 partial(
-                    _display_lambda,
-                    doc=current_doc,
+                    display_lambda,
+                    doc=doc,
                     div=lambda_div,
                     mc_lambda=mc_lambda,
                 )
             )
 
-            current_doc.add_next_tick_callback(
+            doc.add_next_tick_callback(
                 partial(
-                    _display_msg,
-                    doc=current_doc,
+                    display_msg,
+                    doc=doc,
                     div=alert_msg_div,
                     msg='Execution ended successfully.',
                     msg_type='success'
@@ -330,17 +343,15 @@ def collect_global_var():
         else:
             #### TODO FIX THIS STRANGE CODE WITH fcm_layout_dict = partial(
 
-            current_doc.add_next_tick_callback(
-                current_doc.nodes_CDS,
-                current_doc.edges_CDS,
+            doc.add_next_tick_callback(
+                doc.nodes_CDS,
+                doc.edges_CDS,
                 fcm_layout_dict = partial(
-                    _display_msg,
-                    doc=current_doc,
+                    display_msg,
+                    doc=doc,
                     div=alert_msg_div,
                     msg='[ALERT]: The number of iterations (Weight & Input) must be equal!',
                     msg_type='alert'
                 )
             )
             pass
-
-    return None

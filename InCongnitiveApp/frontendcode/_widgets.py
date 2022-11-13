@@ -3,24 +3,57 @@
 from bokeh.plotting import figure
 from bokeh.models.widgets import FileInput
 from bokeh.models import (
-    Div, ColumnDataSource, Button,
-    Spinner, CheckboxGroup, Select,
+    Div, Button, Spinner, CheckboxGroup, Select,
     Panel, Tabs, FactorRange, TableColumn,
     DataTable, BoxZoomTool, PanTool, ResetTool,
     HoverTool, TapTool, WheelZoomTool, SaveTool,
 )
 
-from frontendcode._internal_functions import (
-    _update_graph_renderer
+__all__ = (
+    'page_header',
+    'acknowledgements',
+    'license',
+    'github_repo',
+    'separator',
+    'alert_msg_div',
+    'excel_parse_msg_div',
+    'upload_xlsx_wgt',
+    'nodes_columns',
+    'nodes_data_table',
+    'nodes_data_table_title',
+    'edges_data_table',
+    'edges_columnsedges_data_table',
+    'edges_data_table_title',
+    'taptool',
+    'hovertool',
+    'tools',
+    'fcm_plot',
+    'execute_btn',
+    'iter_on_input_nodes_spinner',
+    'input_nodes_sd_spinner',
+    'variable_input_nodes_rb',
+    'weight_sd_spinner',
+    'variable_zero_weights_rb',
+    'iter_on_weights_spinner',
+    'variable_weights_rb',
+    'tr_function_select',
+    'lambda_spinner',
+    'lambda_autoselect_rb',
+    'f1',
+    'f2',
+    'f3',
+    'tab1',
+    'tab2',
+    'tab3',
+    'tabs',
+    'lambda_div',
+    'extract_btn',
 )
-
-all = ()
 
 
 PARIS_REINFORCE_COLOR = '#9CAB35'
 """str: The default RGB color of PARIS REINFORCE
 """
-
 
 # ---------------------------------------------------------------------
 # Webpage elements   --------------------------------------------------
@@ -45,7 +78,8 @@ acknowledgements = Div(
         ', '
         '<a href="https://holoviews.org" target=_blank> HoloViews 1.14.8</a>'
         ' and '
-        '<a href="https://docs.bokeh.org/en/latest/index.html" target=_blank>Bokeh 2.3.3.</a>'
+        '<a href="https://docs.bokeh.org/en/latest/index.html"'
+        ' target=_blank>Bokeh 2.3.3.</a>'
         ),
     width=400,
     style={'font-size': '100%', 'color': PARIS_REINFORCE_COLOR}
@@ -53,15 +87,17 @@ acknowledgements = Div(
 
 # License Div:
 license = Div(
-    text='License:\
-        <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target=_blank>(CC BY-NC-ND 4.0)</a>',
+    text=('License:'
+          '<a href="https://creativecommons.org/licenses/by-nc-nd/4.0/"'
+          ' target=_blank>(CC BY-NC-ND 4.0)</a>'),
     width=400,
     style={'font-size': '100%', 'color': PARIS_REINFORCE_COLOR}
 )
 
 # Github repository Div:
 github_repo = Div(
-    text='<a href="https://github.com/ThemisKoutsellis/InCognitive" target=_blank>GitHub repository</a>',
+    text=('<a href="https://github.com/ThemisKoutsellis/InCognitive"'
+          ' target=_blank>GitHub repository</a>'),
     width=400,
     style={'font-size': '100%', 'color': PARIS_REINFORCE_COLOR}
 )
@@ -78,7 +114,11 @@ alert_msg_div = Div(text='', width=300, name='alert_msg_div')
 excel_parse_msg_div = Div(text='', width=300, name='xlsx_msg_div')
 
 # Insert input excel button:
-upload_xlsx_wgt = FileInput(accept=".xlsx", multiple=False)
+upload_xlsx_wgt = FileInput(
+    accept=".xlsx",
+    multiple=False,
+    name='upload_xlsx_wgt'
+)
 
 # Node table:
 nodes_columns = [
@@ -124,7 +164,6 @@ edges_data_table_title = Div(
     width=400,
     style={'font-size': '100%', 'color': PARIS_REINFORCE_COLOR}
 )
-
 
 #######################################################################
 # FCM topology figure:
@@ -175,13 +214,6 @@ fcm_plot.yaxis.axis_line_width = 0
 fcm_plot.yaxis.axis_line_color = None
 
 
-
-#Updatate the FCM figure renderers for the 1st time:
-(graph_renderer, labels_renderer) = _update_graph_renderer(current_doc.fcm_layout_dict)
-fcm_plot.renderers = []
-fcm_plot.renderers = [graph_renderer, labels_renderer]
-
-
 # Widget No.2: Collect global variables
 execute_btn = Button(
     label="Execute simulation",
@@ -189,11 +221,9 @@ execute_btn = Button(
     width=550
 )
 
-
-
 # Simulation hyperparameters   ----------------------------------------
 
-# Widget No.3: Variable inputs: Number of iterations
+# # Widget No.3: Variable inputs: Number of iterations
 iter_on_input_nodes_spinner = Spinner(
     title="Number of MC iterations (variable inputs):",
     low=1, high=1000000, step=1, value=1, width=300,
@@ -325,7 +355,7 @@ tab3 = Panel(child=f3, title="Output nodes")
 
 tabs = Tabs(tabs=[tab1, tab2, tab3])
 
-lambda_div = Div()
+lambda_div = Div(name='lambda_div')
 
 extract_btn = Button(label="Save results", button_type="success", width=550)
 

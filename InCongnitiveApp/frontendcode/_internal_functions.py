@@ -9,24 +9,17 @@ from scipy.stats.kde import gaussian_kde
 import holoviews as hv
 hv.extension('bokeh')
 
-from bokeh.models import (
-    Div, ColumnDataSource,
-    Button, Spinner,
-    CheckboxGroup, Select,
-    Panel, Tabs, FactorRange,
-    TableColumn, DataTable,
-    BoxZoomTool, PanTool,
-    ResetTool, HoverTool,
-    TapTool, WheelZoomTool,
-    SaveTool, Circle,
-    MultiLine, Range1d, Band,
-)
-
+from bokeh.models import ColumnDataSource
 from backendcode.fcm_layout_parameters import get_nx_graph
 
-__all__ = ()
+__all__ = (
+    'plot_results',
+    'display_msg',
+    'display_lambda',
+    'update_graph_renderer',
+)
 
-def _display_msg(doc, div, msg, msg_type):
+def display_msg(doc, div, msg, msg_type):
 
     def _show():
         div.text = str(msg)
@@ -42,7 +35,7 @@ def _display_msg(doc, div, msg, msg_type):
 
     doc.add_next_tick_callback(_show)
 
-def _display_lambda(doc, div, mc_lambda):
+def display_lambda(doc, div, mc_lambda):
 
     def _show_lambda():
             div.text = 'Transfer function: λ = {0}'.format(mc_lambda)
@@ -85,7 +78,7 @@ def _rearrange_nodes(node_data_df, input_nodes, output_nodes):
 def _ridge(category, data, scale=20):
     return list(zip([category]*len(data), scale*data))
 
-def _plot_results(f, _x, node_mc_values, baseline_node_values):
+def plot_results(f, _x, node_mc_values, baseline_node_values):
 
     source = ColumnDataSource(data=dict())
 
@@ -122,7 +115,7 @@ def _plot_results(f, _x, node_mc_values, baseline_node_values):
                     _data = [_data[0]]
                 f.circle(_data, _y, alpha=0.6, line_color="black", size=7, color="red")
 
-def _update_graph_renderer(fcm_layout_dict):
+def update_graph_renderer(fcm_layout_dict):
 
     input_nodes = fcm_layout_dict["input_nodes"]
     output_nodes = fcm_layout_dict["output_nodes"]

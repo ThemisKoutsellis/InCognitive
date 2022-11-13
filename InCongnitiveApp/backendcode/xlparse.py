@@ -102,7 +102,7 @@ def get_fcm_layout(df_nodes_order, df_fcm_topology, df_in_out_nodes):
     dict
         the 'fcm_layout_dict' dictionary with the following keys:
             1. 'nodes_order'
-            2. 'node_discription'
+            2. 'nodes_discription'
             3. 'auto_weights'
             4. 'auto_lags'
             5. 'initial_values'
@@ -121,10 +121,10 @@ def get_fcm_layout(df_nodes_order, df_fcm_topology, df_in_out_nodes):
     fcm_layout_dict["nodes_order"] = list(df_nodes_order['nodes order'])
     fcm_layout_dict["nodes_order"] = [x for x in fcm_layout_dict["nodes_order"] if pd.isnull(x) == False]
 
-    fcm_layout_dict["node_discription"] = {
+    fcm_layout_dict["nodes_discription"] = {
         v:list(df_nodes_order['node description'])[i] for i,v in enumerate(fcm_layout_dict["nodes_order"])
     }
-    fcm_layout_dict["node_discription"] = [x for x in fcm_layout_dict["node_discription"] if pd.isnull(x) == False]
+    fcm_layout_dict["nodes_discription"] = [x for x in fcm_layout_dict["nodes_discription"] if pd.isnull(x) == False]
 
     fcm_layout_dict["auto_weights"] = list(df_nodes_order['auto weights'])
     fcm_layout_dict["auto_weights"] = [x for x in fcm_layout_dict["auto_weights"] if pd.isnull(x) == False]

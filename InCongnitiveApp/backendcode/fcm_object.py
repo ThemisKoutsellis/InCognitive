@@ -44,7 +44,7 @@ class FCMap(object):
         if True the app plot the results of the FCM simulation.
     nodes_order : list ofstr
         The order of nodes as they appear in weigth matrix
-    node_discription : list of str
+    nodes_discription : list of str
         a  brief discription of nodes functionality
     input_nodes : list of str
         the input nodes. if no input nodes then input_nodes = []
@@ -130,7 +130,7 @@ class FCMap(object):
         self.fcm_layout_dict = fcm_layout_dict
         self.dont_plot_graphs = dont_plot_graphs
         self.nodes_order = fcm_layout_dict['nodes_order']
-        self.node_discription = fcm_layout_dict['node_discription']
+        self.nodes_discription = fcm_layout_dict['nodes_discription']
         self.input_nodes = fcm_layout_dict['input_nodes']
         self.output_nodes = fcm_layout_dict['output_nodes']
         if self.input_nodes and self.output_nodes:

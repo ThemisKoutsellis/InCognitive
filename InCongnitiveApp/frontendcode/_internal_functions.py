@@ -24,12 +24,14 @@ from bokeh.models import (
 
 from backendcode.fcm_layout_parameters import get_nx_graph
 
-__all__ = []
+__all__ = ()
 
 def _display_msg(doc, div, msg, msg_type):
 
     def _show():
         div.text = str(msg)
+        #doc.set_select({'name': 'alert_msg_div'}, {'text': 'LAALALAL'})
+
 
         if msg_type=='error':
                 div.style= {'font-size': '100%', 'color': 'red'}
@@ -125,7 +127,7 @@ def _update_graph_renderer(fcm_layout_dict):
     input_nodes = fcm_layout_dict["input_nodes"]
     output_nodes = fcm_layout_dict["output_nodes"]
 
-    node_discription = fcm_layout_dict["node_discription"]
+    nodes_discription = fcm_layout_dict["nodes_discription"]
     source_nodes = fcm_layout_dict['source_nodes']
     target_nodes = fcm_layout_dict['target_nodes']
     nodes_order_list = fcm_layout_dict["nodes_order"]

@@ -1,9 +1,9 @@
-# _parsers.py
+# parsers.py
 
 import pandas as pd
 
 from backendcode.xlparse import get_fcm_layout
-from frontendcode._internal_functions import _update_graph_renderer
+from frontendcode.internal_functions import update_graph_renderer
 
 
 all = ('parse_input_xlsx')
@@ -34,9 +34,21 @@ def parse_input_xlsx(
         return None
 
     try:
-        df_nodes_order = pd.read_excel(file_io, 'nodes-order', engine='openpyxl')
-        df_in_out_nodes = pd.read_excel(file_io, 'input-output-nodes', engine='openpyxl')
-        df_fcm_topology = pd.read_excel(file_io, 'fcm-topology', engine='openpyxl')
+        df_nodes_order = pd.read_excel(
+            file_io,
+            'nodes-order',
+            engine='openpyxl'
+        )
+        df_in_out_nodes = pd.read_excel(
+            file_io,
+            'input-output-nodes',
+            engine='openpyxl'
+        )
+        df_fcm_topology = pd.read_excel(
+            file_io,
+            'fcm-topology',
+            engine='openpyxl'
+        )
 
         sheet1cols = list(df_nodes_order.keys())
         sheet2cols = list(df_in_out_nodes.keys())
@@ -78,7 +90,11 @@ def parse_input_xlsx(
         return None
 
     msg_div.text = ' '
-    fcm_layout_dict = get_fcm_layout(df_nodes_order, df_fcm_topology, df_in_out_nodes)
+    fcm_layout_dict = get_fcm_layout(
+        df_nodes_order,
+        df_fcm_topology,
+        df_in_out_nodes,
+    )
 
     # node type column
     input_nodes = fcm_layout_dict['input_nodes']
@@ -92,19 +108,25 @@ def parse_input_xlsx(
         else:
             node_type[i] = 'Intermediate'
 
-    source_nodes_data = {'name': fcm_layout_dict['nodes_order'],
-                     'desc': fcm_layout_dict['nodes_discription'],
-                     "type": node_type,
-                    }
-    source_edges_data = {'source': fcm_layout_dict['source_nodes'],
-                        'target': fcm_layout_dict['target_nodes'],
-                        'weight': fcm_layout_dict['weights'],
-                        }
+    source_nodes_data = {
+        'name': fcm_layout_dict['nodes_order'],
+        'desc': fcm_layout_dict['nodes_discription'],
+        "type": node_type,
+    }
+    source_edges_data = {
+        'source': fcm_layout_dict['source_nodes'],
+        'target': fcm_layout_dict['target_nodes'],
+        'weight': fcm_layout_dict['weights'],
+    }
 
     nodes_CDS.data = source_nodes_data
     edges_CDS.data = source_edges_data
 
-    (graph_renderer, labels_renderer) = _update_graph_renderer(fcm_layout_dict)
+    (
+        graph_renderer,
+        labels_renderer
+    ) = update_graph_renderer(fcm_layout_dict)
+
     fcm_plot.renderers = []
     fcm_plot.renderers = [graph_renderer, labels_renderer]
 

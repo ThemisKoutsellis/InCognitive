@@ -1,4 +1,4 @@
-# _widgets.py
+# widgets.py
 
 from bokeh.plotting import figure
 from bokeh.models.widgets import FileInput
@@ -10,7 +10,7 @@ from bokeh.models import (
 )
 
 __all__ = (
-    'page_header',
+    'web_page_header',
     'acknowledgements',
     'license',
     'github_repo',
@@ -19,10 +19,8 @@ __all__ = (
     'excel_parse_msg_div',
     'upload_xlsx_wgt',
     'nodes_columns',
-    'nodes_data_table',
     'nodes_data_table_title',
-    'edges_data_table',
-    'edges_columnsedges_data_table',
+    'edges_columns',
     'edges_data_table_title',
     'taptool',
     'hovertool',
@@ -42,9 +40,6 @@ __all__ = (
     'f1',
     'f2',
     'f3',
-    'tab1',
-    'tab2',
-    'tab3',
     'tabs',
     'lambda_div',
     'extract_btn',
@@ -60,7 +55,7 @@ PARIS_REINFORCE_COLOR = '#9CAB35'
 # ---------------------------------------------------------------------
 
 # Header Div:
-page_header = Div(
+web_page_header = Div(
     text=("<figure>"
           "<img src='InCongnitiveApp/static/images/in_cognitive_logo.png' "
           "width='400' height='45' "
@@ -126,17 +121,7 @@ nodes_columns = [
     TableColumn(field="desc", title="Node description"),
     TableColumn(field="type", title="Node Type [Input/Intermediate/Output]"),
 ]
-nodes_data_table = DataTable(
-    source=current_doc.nodes_CDS,
-    columns=nodes_columns,
-    min_height=500,
-    max_height=120,
-    width=450,
-    height = 500,
-    editable=True,
-    height_policy="fit",
-    autosize_mode="fit_columns",
-)
+
 nodes_data_table_title = Div(
     text='FCM nodes',
     width=400,
@@ -149,16 +134,7 @@ edges_columns = [
     TableColumn(field="target", title="Target node"),
     TableColumn(field="weight", title="Weight"),
 ]
-edges_data_table = DataTable(
-    source=current_doc.edges_CDS,
-    columns=edges_columns,
-    min_height=500,
-    max_height=120,
-    width=300,
-    height = 500,
-    editable=True,
-    height_policy="fit",
-)
+
 edges_data_table_title = Div(
     text='FCM node interconnections',
     width=400,
@@ -299,18 +275,11 @@ lambda_autoselect_rb = CheckboxGroup(
     active=[0]
 )
 
-# -------------------------
-
-if current_doc.trans_func == 'sigmoid':
-    x_range=[0, 1]
-elif current_doc.trans_func == 'hyperbolic':
-    x_range=[-1, 1]
-
 # -----------------------------------
 # Figure 1.: Input nodes
 # -----------------------------------
 f1 = figure(
-   x_range=x_range,
+   x_range=[0, 1],
    y_range=FactorRange(),
    height=500,width=900,
    title="Input nodes",
@@ -324,7 +293,7 @@ f1.toolbar.logo = None
 # Figure 2.: Intermediate nodes
 # -----------------------------------
 f2 = figure(
-    x_range=x_range,
+    x_range=[0, 1],
     y_range=FactorRange(),
     height=500,width=900,
     title="Intermediate nodes",
@@ -338,7 +307,7 @@ f2.toolbar.logo = None
 # Figure 3.: Output nodes
 # -----------------------------------
 f3 = figure(
-    x_range=x_range,
+    x_range=[0, 1],
     y_range=FactorRange(),
     height=500,width=900,
     title="Output nodes",
@@ -349,14 +318,13 @@ f3 = figure(
 f3.toolbar.logo = None
 
 # ####################################################
-tab1 = Panel(child=f1, title="Input nodes")
-tab2 = Panel(child=f2, title="Intermediate nodes")
-tab3 = Panel(child=f3, title="Output nodes")
+_tab1 = Panel(child=f1, title="Input nodes")
+_tab2 = Panel(child=f2, title="Intermediate nodes")
+_tab3 = Panel(child=f3, title="Output nodes")
 
-tabs = Tabs(tabs=[tab1, tab2, tab3])
+tabs = Tabs(tabs=[_tab1, _tab2, _tab3])
 
 lambda_div = Div(name='lambda_div')
 
 extract_btn = Button(label="Save results", button_type="success", width=550)
-
 

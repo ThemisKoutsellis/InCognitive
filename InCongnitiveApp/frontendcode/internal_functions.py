@@ -1,7 +1,10 @@
-# _internal_functions.py
+# internal_functions.py
+import bisect
 import operator
 import pandas as pd
+import numpy as np
 import networkx as nx
+from time import sleep
 import matplotlib.pyplot as plt
 from scipy.stats.kde import gaussian_kde
 
@@ -10,38 +13,39 @@ import holoviews as hv
 hv.extension('bokeh')
 
 from bokeh.models import ColumnDataSource
+
+# import internal modules
 from backendcode.fcm_layout_parameters import get_nx_graph
+from backendcode.fcmmc_simulation import monte_carlo_simulation
 
 __all__ = (
     'plot_results',
     'display_msg',
-    'display_lambda',
     'update_graph_renderer',
+    'excecute_fcmmc',
 )
 
-def display_msg(doc, div, msg, msg_type):
+def display_msg(who ,doc, div, msg=' ', msg_type='alert'):
+    print('<{0}> called me.'.format(who))
+    def _show_msg():
+        #sleep(1)
 
-    def _show():
         div.text = str(msg)
-        #doc.set_select({'name': 'alert_msg_div'}, {'text': 'LAALALAL'})
-
-
+        # style of msg str
         if msg_type=='error':
-                div.style= {'font-size': '100%', 'color': 'red'}
+            div.style= {'font-size': '100%', 'color': 'red'}
         elif msg_type=='alert':
             div.style= {'font-size': '100%', 'color': 'blue'}
+        elif msg_type=='info':
+            div.style= {'font-size': '100%', 'color': 'black'}
         else:
             div.style= {'font-size': '100%', 'color': 'green'}
+        print('AFTER div.text ={0} for <{1}>'.format(div.text, who) )
+        print('I finished the job for <{0}>.'.format(who))
+        print()
 
-    doc.add_next_tick_callback(_show)
+    _show_msg()
 
-def display_lambda(doc, div, mc_lambda):
-
-    def _show_lambda():
-            div.text = 'Transfer function: λ = {0}'.format(mc_lambda)
-            div.style= {'font-size': '100%', 'color': 'black'}
-
-    doc.add_next_tick_callback(_show_lambda)
 
 def _rearrange_nodes(node_data_df, input_nodes, output_nodes):
     ''' This function rearrange the
@@ -218,8 +222,70 @@ def update_graph_renderer(fcm_layout_dict):
 
     return bokeh_graph_renderer, bokeh_labels_renderer
 
-def execute_simulation():
-    pass
+def excecute_fcmmc(doc):
 
+    # Execute FCM-MC Sim after passing the test of values inconsistency
+    ###################################################################
 
+    # Monte Carlo Simulation
+    (
+    mc_lambda,
+    input_nodes_mc_values,
+    output_nodes_mc_values,
+    intermediate_nodes_mc_values,
+    baseline_input_nodes_values,
+    baseline_output_nodes_values,
+    baseline_intermediate_nodes_values,
+    )=monte_carlo_simulation(
+        doc.fcm_layout_dict,
+        doc.iter_on_input_nodes,
+        doc.iter_on_weights,
+        doc.input_nodes_sd,
+        doc.weights_sd,
+        doc.zero_weights_are_rand_var,
+        doc.trans_func,
+        doc.lamda,
+        doc.autoslect_lambda,
+    )
+
+    # Display results
+    # -----------------------------------------------------------------
+    f1 = doc.get_model_by_name('f1')
+    f2 = doc.get_model_by_name('f2')
+    f3 = doc.get_model_by_name('f3')
+
+    lambda_div = doc.get_model_by_name('lambda_div')
+    alert_msg_div = doc.get_model_by_name('alert_msg_div')
+
+    # Initialize Figures 1,2 & 3
+    def _set_x_range(start, end):
+        f1.x_range.start = start
+        f1.x_range.end = end
+
+        f2.x_range.start = start
+        f2.x_range.end = end
+
+        f3.x_range.start = start
+        f3.x_range.end = end
+    N = 600
+    if doc.trans_func == 'sigmoid':
+        _x = list(np.linspace(0, 1, N))
+        bisect.insort(_x, 0.5)
+        _set_x_range(0,1)
+    elif doc.trans_func == 'hyperbolic':
+        _x = list(np.linspace(-1, 1, N))
+        bisect.insort(_x, 0)
+        _set_x_range(-1,1)
+
+    # Plot Figures 1,2 & 3
+    plot_results(f1, _x, input_nodes_mc_values, baseline_input_nodes_values)
+    plot_results(f2, _x, intermediate_nodes_mc_values, baseline_intermediate_nodes_values)
+    plot_results(f3, _x, output_nodes_mc_values, baseline_output_nodes_values)
+
+    # Final display msgs
+    _error_str = 'Transfer function: λ = {0}'.format(mc_lambda)
+    display_msg(excecute_fcmmc, doc, lambda_div, msg=_error_str, msg_type='info')
+    _msg_str = 'Execution ended successfully.'
+    display_msg(excecute_fcmmc, doc, alert_msg_div, msg=_msg_str, msg_type='success')
+    return
 

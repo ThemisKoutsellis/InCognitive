@@ -1,17 +1,13 @@
-# _callbacks.py
+# callbacks.py
 
 import io
-import bisect
 import numpy as np
 from base64 import b64decode
 from functools import partial
 
 # import internal modules
-from backendcode.fcmmc_simulation import monte_carlo_simulation
-from frontendcode._parsers import parse_input_xlsx
-from frontendcode._internal_functions import (
-    plot_results, display_msg, display_lambda,)
-
+from frontendcode.parsers import parse_input_xlsx
+from frontendcode.internal_functions import display_msg, excecute_fcmmc
 
 __all__ = (
     '_set_iter_when_weights_vary',
@@ -29,19 +25,8 @@ __all__ = (
     '_collect_global_var'
 )
 
-# clear msg div
-def _clear_msg_div(doc, div):
-    msg_cb = partial(
-        display_msg,
-        doc=doc,
-        div=div,
-        msg=' ',
-        msg_type='alert'
-    )
-    doc.add_next_tick_callback(msg_cb)
-
 #######################################################################
-def _get_xlsx(attr, old, new, doc):
+def _get_xlsx(attr, old, new, who, doc):
 
     doc.fcm_layout_dict = {}
     doc.nodes_CDS.data = {}
@@ -72,9 +57,9 @@ def _get_xlsx(attr, old, new, doc):
     )
 
 #######################################################################
-def _set_iter_when_weights_vary(attr, old, new, doc):
-    _clear_msg_div(doc, doc.get_model_by_name('alert_msg_div'))
+def _set_iter_when_weights_vary(attr, old, new, who, doc):
 
+    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
     doc.iter_on_weights = new
 
     _zero_w_rb = doc.get_model_by_name('variable_zero_weights_rb')
@@ -91,8 +76,8 @@ def _set_iter_when_weights_vary(attr, old, new, doc):
         _w_sd_spinner.disabled = False
 
 #######################################################################
-def _set_iter_when_inputs_vary(attr, old, new, doc):
-    _clear_msg_div(doc, doc.get_model_by_name('alert_msg_div'))
+def _set_iter_when_inputs_vary(attr, old, new, who, doc):
+    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
 
     _in_sd_spinner = doc.get_model_by_name('input_nodes_sd_spinner')
 
@@ -105,14 +90,14 @@ def _set_iter_when_inputs_vary(attr, old, new, doc):
         _in_sd_spinner.disabled = False
 
 #######################################################################
-def _set_lambda(attr, old, new, doc):
-    _clear_msg_div(doc, doc.get_model_by_name('alert_msg_div'))
+def _set_lambda(attr, old, new, who, doc):
+    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
 
     doclamda = new
 
 #######################################################################
-def _autoslect_lambda(active, doc):
-    _clear_msg_div(doc, doc.get_model_by_name('alert_msg_div'))
+def _autoslect_lambda(active, who, doc):
+    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
 
     _lambda_spinner = doc.get_model_by_name('lambda_spinner')
 
@@ -126,8 +111,8 @@ def _autoslect_lambda(active, doc):
         _lambda_spinner.value = 0.5
 
 #######################################################################
-def _variation_on_weights(active, doc):
-    _clear_msg_div(doc, doc.get_model_by_name('alert_msg_div'))
+def _variation_on_weights(active, who, doc):
+    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
 
     _itr_w_spinner = doc.get_model_by_name('iter_on_weights_spinner')
     _w_sd_spinner = doc.get_model_by_name('weight_sd_spinner')
@@ -161,8 +146,8 @@ def _variation_on_weights(active, doc):
         doc.zero_weights_are_rand_var = False
 
 #######################################################################
-def _variation_on_input_nodes(active, doc):
-    _clear_msg_div(doc, doc.get_model_by_name('alert_msg_div'))
+def _variation_on_input_nodes(active, who, doc):
+    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
 
     _itr_spinner = doc.get_model_by_name('iter_on_input_nodes_spinner')
     _in_sd_spinner = doc.get_model_by_name('input_nodes_sd_spinner')
@@ -186,26 +171,26 @@ def _variation_on_input_nodes(active, doc):
         doc.sd_inputs = 0
 
 #######################################################################
-def _set_trans_func(attr, old, new, doc):
-    _clear_msg_div(doc, doc.get_model_by_name('alert_msg_div'))
+def _set_trans_func(attr, old, new, who, doc):
+    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
 
     doc.trans_func = new
 
 #######################################################################
-def _set_input_sd(attr, old, new, doc):
-    _clear_msg_div(doc, doc.get_model_by_name('alert_msg_div'))
+def _set_input_sd(attr, old, new, who, doc):
+    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
 
     doc.input_nodes_sd = new
 
 #######################################################################
-def _set_weights_sd(attr, old, new, doc):
-    _clear_msg_div(doc, doc.get_model_by_name('alert_msg_div'))
+def _set_weights_sd(attr, old, new, who, doc):
+    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
 
     doc.weights_sd = new
 
 #######################################################################
-def _are_zero_weights_rand_var(active, doc):
-    _clear_msg_div(doc, doc.get_model_by_name('alert_msg_div'))
+def _are_zero_weights_rand_var(active, who, doc):
+    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
 
     if active:
         doc.zero_weights_are_rand_var = True
@@ -213,11 +198,11 @@ def _are_zero_weights_rand_var(active, doc):
         doc.zero_weights_are_rand_var = False
 
 #######################################################################
-def _clear_allert_msg_div(attr, old, new, doc):
+def _clear_allert_msg_div(attr, old, new, who, doc):
     doc.set_select({'name': 'alert_msg_div'}, {'text': ' '})
 
 #######################################################################
-def _collect_global_var(doc):
+def _collect_global_var(who, doc):
 
     f1 = doc.get_model_by_name('f1')
     f2 = doc.get_model_by_name('f2')
@@ -227,131 +212,37 @@ def _collect_global_var(doc):
     alert_msg_div = doc.get_model_by_name('alert_msg_div')
     upload_xlsx_wgt = doc.get_model_by_name('upload_xlsx_wgt')
 
+    # initialize figures
     f1.renderers = []
     f2.renderers = []
     f3.renderers = []
+    display_msg(who, doc, lambda_div, msg='Please wait ...')
 
-    doc.add_next_tick_callback(
-        partial(
-            display_msg,
-            doc=doc,
-            div=alert_msg_div,
-            msg=' ',
-            msg_type='alert',
-        )
-    )
-
+    # chack of input values inconsistencies
     error1 = not bool(upload_xlsx_wgt.filename)
     error2 = not bool(doc.fcm_layout_dict)
     if not error2:
         error3 = not bool(doc.fcm_layout_dict['source_nodes'])
     else:
         error3 = True
-
     _expr = error1 or error2 or error3
     if _expr:
-
         _error_str = ('[Error]: There is no input excel'
                       ' file OR the excel file is erroneous!')
-        doc.add_next_tick_callback(
-            partial(
-                display_msg,
-                doc=doc,
-                div=alert_msg_div,
-                msg=_error_str,
-                msg_type='error'
-            )
-        )
-    else:
-        _expr1 = doc.iter_on_input_nodes == doc.iter_on_weights
-        _expr2 = (doc.iter_on_input_nodes < 2) or (doc.iter_on_weights < 2)
+        #display_msg(who, doc, alert_msg_div, msg=_error_str, msg_type='error')
+        display_msg(who, doc, lambda_div, msg=' ')
+        return
 
-        if _expr1 or _expr2:
-            # Monte Carlo Simulation
-            (
-            mc_lambda,
-            input_nodes_mc_values,
-            output_nodes_mc_values,
-            intermediate_nodes_mc_values,
-            baseline_input_nodes_values,
-            baseline_output_nodes_values,
-            baseline_intermediate_nodes_values,
-            )=monte_carlo_simulation(
-                doc.fcm_layout_dict,
-                doc.iter_on_input_nodes,
-                doc.iter_on_weights,
-                doc.input_nodes_sd,
-                doc.weights_sd,
-                doc.zero_weights_are_rand_var,
-                doc.trans_func,
-                doc.lamda,
-                doc.autoslect_lambda,
-            )
+    _expr1 = doc.iter_on_input_nodes == doc.iter_on_weights
+    _expr2 = (doc.iter_on_input_nodes < 2) or (doc.iter_on_weights < 2)
 
+    if not (_expr1 or _expr2):
+        _error_msg = ('[ALERT]: The number of iterations'
+                      ' (Weight & Input) must be equal!')
+        display_msg(who, doc, alert_msg_div, msg=_error_msg, msg_type='alert')
+        return
 
-            ##           Plot FIGURES              ##
-            #########################################
+    # call the FCM-MC function on next tick
 
-            def _set_x_range(start, end):
-                f1.x_range.start = start
-                f1.x_range.end = end
-
-                f2.x_range.start = start
-                f2.x_range.end = end
-
-                f3.x_range.start = start
-                f3.x_range.end = end
-
-            N = 600
-
-            if doc.trans_func == 'sigmoid':
-                _x = list(np.linspace(0, 1, N))
-                bisect.insort(_x, 0.5)
-                _set_x_range(0,1)
-
-            elif doc.trans_func == 'hyperbolic':
-                _x = list(np.linspace(-1, 1, N))
-                bisect.insort(_x, 0)
-                _set_x_range(-1,1)
-
-            # ------------------------
-            #   Plot Figure 1,2 & 3
-            # ------------------------
-
-            plot_results(f1, _x, input_nodes_mc_values, baseline_input_nodes_values)
-            plot_results(f2, _x, intermediate_nodes_mc_values, baseline_intermediate_nodes_values)
-            plot_results(f3, _x, output_nodes_mc_values, baseline_output_nodes_values)
-
-            doc.add_next_tick_callback(
-                partial(
-                    display_lambda,
-                    doc=doc,
-                    div=lambda_div,
-                    mc_lambda=mc_lambda,
-                )
-            )
-
-            doc.add_next_tick_callback(
-                partial(
-                    display_msg,
-                    doc=doc,
-                    div=alert_msg_div,
-                    msg='Execution ended successfully.',
-                    msg_type='success'
-                )
-            )
-        else:
-            #### TODO FIX THIS STRANGE CODE WITH fcm_layout_dict = partial(
-
-            doc.add_next_tick_callback(
-                doc.nodes_CDS,
-                doc.edges_CDS,
-                fcm_layout_dict = partial(
-                    display_msg,
-                    doc=doc,
-                    div=alert_msg_div,
-                    msg='[ALERT]: The number of iterations (Weight & Input) must be equal!',
-                    msg_type='alert'
-                )
-            )
-            pass
+    fcmmc_cb = partial(excecute_fcmmc, doc)
+    doc.add_next_tick_callback(fcmmc_cb)

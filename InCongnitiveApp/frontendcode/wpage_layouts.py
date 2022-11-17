@@ -2,10 +2,10 @@
 
 # general imports
 from bokeh.layouts import layout, column, row
+from bokeh.models import Spacer
 
 # import internal modules
 from frontendcode.widgets import *
-
 
 __all__ = (
     'uploadxlsx_layout',
@@ -16,6 +16,8 @@ __all__ = (
     'simulation_parameters_layout',
     'fcmmc_layout',
     'footer_layout',
+    'edges_buttons',
+    'node_buttons',
 )
 
 # ---------------------------------------------------------------------
@@ -23,6 +25,10 @@ __all__ = (
 # ---------------------------------------------------------------------
 
 uploadxlsx_layout = column(upload_xlsx_wgt, excel_parse_msg_div)
+
+spacer = Spacer(width=20, height=20)
+node_buttons = row(add_node_row, spacer, del_node_row)
+edges_buttons = row(add_edge_row, spacer, del_edge_row)
 
 # Simulation layout:
 input_nodes_layout = layout(

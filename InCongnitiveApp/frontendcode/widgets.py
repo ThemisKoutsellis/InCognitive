@@ -43,6 +43,10 @@ __all__ = (
     'tabs',
     'lambda_div',
     'save_bn',
+    'add_edge_row',
+    'del_edge_row',
+    'del_node_row',
+    'add_node_row',
 )
 
 
@@ -115,7 +119,7 @@ upload_xlsx_wgt = FileInput(
     name='upload_xlsx_wgt'
 )
 
-# Node table:
+# Nodes DataTable:
 nodes_columns = [
     TableColumn(field="name", title="Node name"),
     TableColumn(field="desc", title="Node description"),
@@ -131,7 +135,17 @@ nodes_data_table_title = Div(
     style={'font-size': '100%', 'color': PARIS_REINFORCE_COLOR}
 )
 
-# Interconnections node table:
+add_node_row = Button(
+    label="Add new row",
+    button_type="success", width=80,
+)
+
+del_node_row = Button(
+    label="Delete selected row(s)",
+    button_type="success", width=80,
+)
+
+# Node interconnections DataTable:
 edges_columns = [
     TableColumn(field="source", title="Source node"),
     TableColumn(field="target", title="Target node"),
@@ -145,16 +159,14 @@ edges_data_table_title = Div(
 )
 
 add_edge_row = Button(
-    label="Save layout to xlsx format",
-    button_type="success", width=550,
+    label="Add new row",
+    button_type="success", width=80,
 )
 
-
-del_esge_row = Button(
-    label="Save layout to xlsx format",
-    button_type="success", width=550,
+del_edge_row = Button(
+    label="Delete selected row(s)",
+    button_type="success", width=80,
 )
-
 
 
 #######################################################################

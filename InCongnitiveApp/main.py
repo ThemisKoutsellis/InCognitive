@@ -12,6 +12,7 @@ from bokeh.io import curdoc
 from bokeh.models import DataTable
 from bokeh.models import ColumnDataSource
 from bokeh.layouts import layout, column, row
+#From bokeh.models.layouts import Spacer
 
 # import internal modules
 from frontendcode.widgets import *
@@ -95,8 +96,16 @@ edges_data_table = DataTable(
 
 # FCM plot and tables display:
 datatables_layout = row(
-    column(nodes_data_table_title, nodes_data_table),
-    column(edges_data_table_title, edges_data_table),
+    column(
+        nodes_data_table_title,
+        nodes_data_table,
+        node_buttons
+    ),
+    column(
+        edges_data_table_title,
+        edges_data_table,
+        edges_buttons
+    ),
 )
 fcm_data_manager_layout = column(
     separator(width=550, height=15),
@@ -106,9 +115,11 @@ fcm_data_manager_layout = column(
     separator(width=550, height=15),
     save_bn,
 )
+
 fcm_display_layout = layout(
     row(fcm_plot, fcm_data_manager_layout)
 )
+
 # Root (web page) layout:
 web_page_layout = column(
     web_page_header,
@@ -162,6 +173,19 @@ fcm_plot.on_change('renderers', clear_allert_msg_div_cb)
 
 clear_allert_msg_div_cb = partial(_collect_global_var, doc=current_doc)
 execute_btn.on_click(clear_allert_msg_div_cb)
+
+clear_allert_msg_div_cb = partial(_collect_global_var, doc=current_doc)
+execute_btn.on_click(clear_allert_msg_div_cb)
+
+#add_edge_row.on_click()
+
+del_edges_cb = partial(_del_edges_cds_rows, doc=current_doc)
+del_edge_row.on_click(del_edges_cb)
+
+#add_node_row.on_click()
+
+del_nodes_cb = partial(_del_nodes_cds_rows, doc=current_doc)
+del_node_row.on_click(del_nodes_cb)
 
 # ---------------------------------------------------------------------
 # Initialize doc   ----------------------------------------------------

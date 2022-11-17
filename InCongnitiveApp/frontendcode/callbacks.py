@@ -5,6 +5,8 @@ import numpy as np
 from base64 import b64decode
 from functools import partial
 
+from bokeh.models import ColumnDataSource
+
 # import internal modules
 from frontendcode.parsers import parse_input_xlsx
 from frontendcode.internal_functions import (
@@ -23,7 +25,9 @@ __all__ = (
     '_set_weights_sd',
     '_are_zero_weights_rand_var',
     '_clear_allert_msg_div',
-    '_collect_global_var'
+    '_collect_global_var',
+    '_del_edges_cds_rows',
+    '_del_nodes_cds_rows',
 )
 
 #######################################################################
@@ -208,6 +212,113 @@ def _clear_allert_msg_div(attr, old, new, doc):
         display_msg(alert_msg_div)
         display_msg(lambda_div)
 
+#######################################################################
+def _del_edges_cds_rows(doc):
+    if 'index' in doc.edges_CDS.data:
+        del doc.edges_CDS.data['index']
+    _rows_to_del = doc.edges_CDS.selected.indices
+
+    # deleting rows from Edges DataTables
+    _edges_df = doc.edges_CDS.to_df()
+    _edges_df.drop(_rows_to_del, inplace=True)
+
+    doc.edges_CDS.data = doc.edges_CDS.from_df(_edges_df)
+    if 'index' in doc.edges_CDS.data:
+            del doc.edges_CDS.data['index']
+
+    # Uncheck the rest of DataTable rows
+    doc.edges_CDS.selected.indices = []
+
+#######################################################################
+def _del_nodes_cds_rows(doc):
+
+    if 'index' in doc.nodes_CDS.data:
+        del doc.nodes_CDS.data['index']
+    if 'index' in doc.edges_CDS.data:
+        del doc.edges_CDS.data['index']
+    #print('doc.nodes_CDS=', doc.nodes_CDS.data)
+
+    _nodes_df = doc.nodes_CDS.to_df()
+    _edges_df = doc.edges_CDS.to_df()
+
+    # Rows to delete in both DataTables
+    # ----------------------------------
+    # 1. Node DataTable
+    _node_rows_to_del = doc.nodes_CDS.selected.indices
+    _nodes_to_delete = [_nodes_df.iloc[i,0] for i in _node_rows_to_del]
+    #print('_rows_to_del= ', _node_rows_to_del)
+    # 2. Edges DataTable
+    _edges_to_delete_idx = []
+    for _node in _nodes_to_delete:
+        pass
+
+
+
+
+
+
+
+
+
+
+
+
+    # Deleting rows from both DataTables
+    # ----------------------------------
+    print('_nodes_df= \n', _nodes_df.head(2))
+    _nodes_df.drop(_node_rows_to_del, inplace=True)
+    print()
+    print('_nodes_df= \n', _nodes_df.head(2))
+    #Change the doc.CDS
+    doc.nodes_CDS.data = doc.nodes_CDS.from_df(_nodes_df)
+    if 'index' in doc.nodes_CDS.data:
+            del doc.nodes_CDS.data['index']
+    print()
+    print('doc.nodes_CDS=', doc.nodes_CDS.data)
+    print('========================================')
+    # Uncheck the rest of DataTable rows
+    doc.nodes_CDS.selected.indices = []
+    doc.edges_CDS.selected.indices = []
+
+
+    #_edges_cds  = doc.edges_CDS
+    #if 'index' in _edges_cds.data:
+    #    del _edges_cds.data['index']
+    #_edges_df = _edges_cds.to_df()
+    #_nodes_to_delete = [_nodes_df.iloc[i,0] for i in _rows_to_del]
+    #print('_nodes_to_delete=', _nodes_to_delete)
+    #_edges_to_delete_idx = []
+    #for _node in _nodes_to_delete:
+    #    _idx_list1 = _edges_df.index[_edges_df['source'] == _node].tolist()
+    #    _edges_to_delete_idx = [*_edges_to_delete_idx, *_idx_list1]
+    #    _idx_list2 = _edges_df.index[_edges_df['target'] == _node].tolist()
+    #    _edges_to_delete_idx = [*_edges_to_delete_idx, *_idx_list2]
+    #    _edges_to_delete_idx = list(set(_edges_to_delete_idx))
+    #print('_edges_to_delete_idx=', _edges_to_delete_idx)
+
+    # deleting rows from both DataTables
+    #_nodes_df.drop(_rows_to_del, inplace=True)
+    #print(_nodes_df)
+    #_nodes_cds = ColumnDataSource(_nodes_df)
+
+    #_edges_df.drop(_edges_to_delete_idx, inplace=True)
+    #doc.edges_CDS = ColumnDataSource(_nodes_df)
+
+    #if 'index' in _edges_cds.data:
+    #    del doc.edges_CDS.data['index']
+    #if 'index' in _nodes_cds.data:
+    #    print(_nodes_cds.data)
+    #    del _nodes_cds.data['index']
+
+    #print('AFTER deleting')
+    #print(doc.nodes_CDS.data)
+    #print(doc.edges_CDS.data)
+    #print('======================================')
+    #print()
+    #print()
+
+
+    #_edges_cds.selected.indices = []
 
 #######################################################################
 def _collect_global_var(doc):
@@ -230,4 +341,3 @@ def _collect_global_var(doc):
     # check for inconsistencies
     check_incons_cb = partial(check_for_inconsistencies, doc)
     doc.add_next_tick_callback(check_incons_cb)
-

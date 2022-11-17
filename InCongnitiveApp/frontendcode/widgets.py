@@ -1,7 +1,7 @@
 # widgets.py
 
 from bokeh.plotting import figure
-from bokeh.models.widgets import FileInput
+from bokeh.models.widgets import FileInput, NumberEditor
 from bokeh.models import (
     Div, Button, Spinner, CheckboxGroup, Select,
     Panel, Tabs, FactorRange, TableColumn,
@@ -42,7 +42,7 @@ __all__ = (
     'f3',
     'tabs',
     'lambda_div',
-    'extract_btn',
+    'save_bn',
 )
 
 
@@ -119,7 +119,10 @@ upload_xlsx_wgt = FileInput(
 nodes_columns = [
     TableColumn(field="name", title="Node name"),
     TableColumn(field="desc", title="Node description"),
-    TableColumn(field="type", title="Node Type [Input/Intermediate/Output]"),
+    TableColumn(field="type",
+                title="Node type [Input/Intermediate/Output]"),
+    TableColumn(field="initial value",
+                title="Initial value", editor=NumberEditor()),
 ]
 
 nodes_data_table_title = Div(
@@ -132,7 +135,7 @@ nodes_data_table_title = Div(
 edges_columns = [
     TableColumn(field="source", title="Source node"),
     TableColumn(field="target", title="Target node"),
-    TableColumn(field="weight", title="Weight"),
+    TableColumn(field="weight", title="Weight", editor=NumberEditor()),
 ]
 
 edges_data_table_title = Div(
@@ -140,6 +143,19 @@ edges_data_table_title = Div(
     width=400,
     style={'font-size': '100%', 'color': PARIS_REINFORCE_COLOR}
 )
+
+add_edge_row = Button(
+    label="Save layout to xlsx format",
+    button_type="success", width=550,
+)
+
+
+del_esge_row = Button(
+    label="Save layout to xlsx format",
+    button_type="success", width=550,
+)
+
+
 
 #######################################################################
 # FCM topology figure:
@@ -326,5 +342,8 @@ tabs = Tabs(tabs=[_tab1, _tab2, _tab3])
 
 lambda_div = Div(name='lambda_div')
 
-extract_btn = Button(label="Save results", button_type="success", width=550)
+save_bn = Button(
+    label="Save layout to xlsx format",
+    button_type="success", width=550,
+)
 

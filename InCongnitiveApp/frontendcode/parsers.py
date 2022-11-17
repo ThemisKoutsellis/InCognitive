@@ -112,6 +112,7 @@ def parse_input_xlsx(
         'name': fcm_layout_dict['nodes_order'],
         'desc': fcm_layout_dict['nodes_discription'],
         "type": node_type,
+        "initial value": fcm_layout_dict['initial_values'],
     }
     source_edges_data = {
         'source': fcm_layout_dict['source_nodes'],

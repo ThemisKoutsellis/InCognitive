@@ -72,7 +72,12 @@ nodes_data_table = DataTable(
     editable=True,
     height_policy="fit",
     autosize_mode="fit_columns",
-)
+    header_row=True,
+    sortable=True,
+    auto_edit=True,
+    selectable='checkbox',
+    scroll_to_selection=True,
+    )
 
 edges_data_table = DataTable(
     source=current_doc.edges_CDS,
@@ -83,6 +88,9 @@ edges_data_table = DataTable(
     height = 500,
     editable=True,
     height_policy="fit",
+    auto_edit=True,
+    selectable='checkbox',
+    scroll_to_selection=True,
 )
 
 # FCM plot and tables display:
@@ -95,6 +103,8 @@ fcm_data_manager_layout = column(
     uploadxlsx_layout,
     separator(width=550, height=15),
     datatables_layout,
+    separator(width=550, height=15),
+    save_bn,
 )
 fcm_display_layout = layout(
     row(fcm_plot, fcm_data_manager_layout)
@@ -114,43 +124,43 @@ web_page_layout = column(
 # Attach callbacks on widgets    --------------------------------------
 # ---------------------------------------------------------------------
 
-upload_xlsx_cb = partial(_get_xlsx, who=upload_xlsx_wgt, doc=current_doc)
+upload_xlsx_cb = partial(_get_xlsx, doc=current_doc)
 upload_xlsx_wgt.on_change('value', upload_xlsx_cb)
 
-iter_on_weights_cb = partial(_set_iter_when_weights_vary, who=iter_on_weights_spinner, doc=current_doc)
+iter_on_weights_cb = partial(_set_iter_when_weights_vary, doc=current_doc)
 iter_on_weights_spinner.on_change('value', iter_on_weights_cb)
 
-iter_on_input_nodes_cb = partial(_set_iter_when_inputs_vary, who=iter_on_input_nodes_spinner, doc=current_doc)
+iter_on_input_nodes_cb = partial(_set_iter_when_inputs_vary, doc=current_doc)
 iter_on_input_nodes_spinner.on_change('value', iter_on_input_nodes_cb)
 
-set_lambda_cb = partial(_set_lambda, who=lambda_spinner, doc=current_doc)
+set_lambda_cb = partial(_set_lambda, doc=current_doc)
 lambda_spinner.on_change('value', set_lambda_cb)
 
-lambda_autoselect_cb = partial(_autoslect_lambda, who=lambda_autoselect_rb, doc=current_doc)
+lambda_autoselect_cb = partial(_autoslect_lambda, doc=current_doc)
 lambda_autoselect_rb.on_click(lambda_autoselect_cb)
 
-variation_on_weights_cb = partial(_variation_on_weights, who=variable_weights_rb, doc=current_doc)
+variation_on_weights_cb = partial(_variation_on_weights, doc=current_doc)
 variable_weights_rb.on_click(variation_on_weights_cb)
 
-variation_on_input_nodes_cb = partial(_variation_on_input_nodes, who=variable_input_nodes_rb, doc=current_doc)
+variation_on_input_nodes_cb = partial(_variation_on_input_nodes, doc=current_doc)
 variable_input_nodes_rb.on_click(variation_on_input_nodes_cb)
 
-set_input_sd_cb = partial(_set_input_sd, who=input_nodes_sd_spinner, doc=current_doc)
+set_input_sd_cb = partial(_set_input_sd, doc=current_doc)
 input_nodes_sd_spinner.on_change('value', set_input_sd_cb)
 
-set_trans_func_cb = partial(_set_trans_func, who=tr_function_select, doc=current_doc)
+set_trans_func_cb = partial(_set_trans_func, doc=current_doc)
 tr_function_select.on_change("value", set_trans_func_cb)
 
-set_weights_sd_cb = partial(_set_weights_sd, who=weight_sd_spinner, doc=current_doc)
+set_weights_sd_cb = partial(_set_weights_sd, doc=current_doc)
 weight_sd_spinner.on_change('value', set_weights_sd_cb)
 
-are_zero_weights_variable_cb = partial(_are_zero_weights_rand_var, who=variable_zero_weights_rb, doc=current_doc)
+are_zero_weights_variable_cb = partial(_are_zero_weights_rand_var, doc=current_doc)
 variable_zero_weights_rb.on_click(are_zero_weights_variable_cb)
 
-clear_allert_msg_div_cb = partial(_clear_allert_msg_div, who=fcm_plot, doc=current_doc)
+clear_allert_msg_div_cb = partial(_clear_allert_msg_div, doc=current_doc)
 fcm_plot.on_change('renderers', clear_allert_msg_div_cb)
 
-clear_allert_msg_div_cb = partial(_collect_global_var, who=execute_btn, doc=current_doc)
+clear_allert_msg_div_cb = partial(_collect_global_var, doc=current_doc)
 execute_btn.on_click(clear_allert_msg_div_cb)
 
 # ---------------------------------------------------------------------

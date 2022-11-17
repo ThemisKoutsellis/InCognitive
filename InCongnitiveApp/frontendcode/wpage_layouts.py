@@ -57,8 +57,7 @@ simulation_parameters_layout = layout(
     separator(width=550, height=15),
 )
 
-results_layout = layout(
-    column(tabs, lambda_div, extract_btn))
+results_layout = layout(column(tabs, lambda_div))
 
 fcmmc_layout = row(simulation_parameters_layout, results_layout)
 

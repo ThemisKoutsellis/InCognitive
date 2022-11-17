@@ -7,7 +7,8 @@ from functools import partial
 
 # import internal modules
 from frontendcode.parsers import parse_input_xlsx
-from frontendcode.internal_functions import display_msg, excecute_fcmmc
+from frontendcode.internal_functions import (
+    display_msg, excecute_fcmmc, check_for_inconsistencies)
 
 __all__ = (
     '_set_iter_when_weights_vary',
@@ -26,7 +27,7 @@ __all__ = (
 )
 
 #######################################################################
-def _get_xlsx(attr, old, new, who, doc):
+def _get_xlsx(attr, old, new, doc):
 
     doc.fcm_layout_dict = {}
     doc.nodes_CDS.data = {}
@@ -57,9 +58,9 @@ def _get_xlsx(attr, old, new, who, doc):
     )
 
 #######################################################################
-def _set_iter_when_weights_vary(attr, old, new, who, doc):
+def _set_iter_when_weights_vary(attr, old, new, doc):
 
-    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
+    display_msg(doc.get_model_by_name('alert_msg_div'))
     doc.iter_on_weights = new
 
     _zero_w_rb = doc.get_model_by_name('variable_zero_weights_rb')
@@ -76,8 +77,8 @@ def _set_iter_when_weights_vary(attr, old, new, who, doc):
         _w_sd_spinner.disabled = False
 
 #######################################################################
-def _set_iter_when_inputs_vary(attr, old, new, who, doc):
-    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
+def _set_iter_when_inputs_vary(attr, old, new, doc):
+    display_msg(doc.get_model_by_name('alert_msg_div'))
 
     _in_sd_spinner = doc.get_model_by_name('input_nodes_sd_spinner')
 
@@ -90,14 +91,14 @@ def _set_iter_when_inputs_vary(attr, old, new, who, doc):
         _in_sd_spinner.disabled = False
 
 #######################################################################
-def _set_lambda(attr, old, new, who, doc):
-    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
+def _set_lambda(attr, old, new, doc):
+    display_msg(doc.get_model_by_name('alert_msg_div'))
 
-    doclamda = new
+    doc.lamda = new
 
 #######################################################################
-def _autoslect_lambda(active, who, doc):
-    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
+def _autoslect_lambda(active, doc):
+    display_msg(doc.get_model_by_name('alert_msg_div'))
 
     _lambda_spinner = doc.get_model_by_name('lambda_spinner')
 
@@ -109,10 +110,11 @@ def _autoslect_lambda(active, who, doc):
         doc.autoslect_lambda = False
         _lambda_spinner.disabled = False
         _lambda_spinner.value = 0.5
+        doc.lamda = 0.5
 
 #######################################################################
-def _variation_on_weights(active, who, doc):
-    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
+def _variation_on_weights(active, doc):
+    display_msg(doc.get_model_by_name('alert_msg_div'))
 
     _itr_w_spinner = doc.get_model_by_name('iter_on_weights_spinner')
     _w_sd_spinner = doc.get_model_by_name('weight_sd_spinner')
@@ -146,8 +148,8 @@ def _variation_on_weights(active, who, doc):
         doc.zero_weights_are_rand_var = False
 
 #######################################################################
-def _variation_on_input_nodes(active, who, doc):
-    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
+def _variation_on_input_nodes(active, doc):
+    display_msg(doc.get_model_by_name('alert_msg_div'))
 
     _itr_spinner = doc.get_model_by_name('iter_on_input_nodes_spinner')
     _in_sd_spinner = doc.get_model_by_name('input_nodes_sd_spinner')
@@ -171,26 +173,27 @@ def _variation_on_input_nodes(active, who, doc):
         doc.sd_inputs = 0
 
 #######################################################################
-def _set_trans_func(attr, old, new, who, doc):
-    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
+def _set_trans_func(attr, old, new, doc):
+    display_msg(doc.get_model_by_name('alert_msg_div'))
 
     doc.trans_func = new
+    print(doc.trans_func)
 
 #######################################################################
-def _set_input_sd(attr, old, new, who, doc):
-    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
+def _set_input_sd(attr, old, new, doc):
+    display_msg(doc.get_model_by_name('alert_msg_div'))
 
     doc.input_nodes_sd = new
 
 #######################################################################
-def _set_weights_sd(attr, old, new, who, doc):
-    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
+def _set_weights_sd(attr, old, new, doc):
+    display_msg(doc.get_model_by_name('alert_msg_div'))
 
     doc.weights_sd = new
 
 #######################################################################
-def _are_zero_weights_rand_var(active, who, doc):
-    display_msg(who, doc, doc.get_model_by_name('alert_msg_div'))
+def _are_zero_weights_rand_var(active, doc):
+    display_msg(doc.get_model_by_name('alert_msg_div'))
 
     if active:
         doc.zero_weights_are_rand_var = True
@@ -198,51 +201,33 @@ def _are_zero_weights_rand_var(active, who, doc):
         doc.zero_weights_are_rand_var = False
 
 #######################################################################
-def _clear_allert_msg_div(attr, old, new, who, doc):
-    doc.set_select({'name': 'alert_msg_div'}, {'text': ' '})
+def _clear_allert_msg_div(attr, old, new, doc):
+    lambda_div = doc.get_model_by_name('lambda_div')
+    alert_msg_div = doc.get_model_by_name('alert_msg_div')
+    if lambda_div and alert_msg_div:
+        display_msg(alert_msg_div)
+        display_msg(lambda_div)
+
 
 #######################################################################
-def _collect_global_var(who, doc):
+def _collect_global_var(doc):
 
+    print(doc.fcm_layout_dict)
     f1 = doc.get_model_by_name('f1')
     f2 = doc.get_model_by_name('f2')
     f3 = doc.get_model_by_name('f3')
-
-    lambda_div = doc.get_model_by_name('lambda_div')
-    alert_msg_div = doc.get_model_by_name('alert_msg_div')
-    upload_xlsx_wgt = doc.get_model_by_name('upload_xlsx_wgt')
 
     # initialize figures
     f1.renderers = []
     f2.renderers = []
     f3.renderers = []
-    display_msg(who, doc, lambda_div, msg='Please wait ...')
 
-    # chack of input values inconsistencies
-    error1 = not bool(upload_xlsx_wgt.filename)
-    error2 = not bool(doc.fcm_layout_dict)
-    if not error2:
-        error3 = not bool(doc.fcm_layout_dict['source_nodes'])
-    else:
-        error3 = True
-    _expr = error1 or error2 or error3
-    if _expr:
-        _error_str = ('[Error]: There is no input excel'
-                      ' file OR the excel file is erroneous!')
-        #display_msg(who, doc, alert_msg_div, msg=_error_str, msg_type='error')
-        display_msg(who, doc, lambda_div, msg=' ')
-        return
+    lambda_div = doc.get_model_by_name('lambda_div')
+    alert_msg_div = doc.get_model_by_name('alert_msg_div')
+    display_msg(lambda_div)
+    display_msg(alert_msg_div)
 
-    _expr1 = doc.iter_on_input_nodes == doc.iter_on_weights
-    _expr2 = (doc.iter_on_input_nodes < 2) or (doc.iter_on_weights < 2)
+    # check for inconsistencies
+    check_incons_cb = partial(check_for_inconsistencies, doc)
+    doc.add_next_tick_callback(check_incons_cb)
 
-    if not (_expr1 or _expr2):
-        _error_msg = ('[ALERT]: The number of iterations'
-                      ' (Weight & Input) must be equal!')
-        display_msg(who, doc, alert_msg_div, msg=_error_msg, msg_type='alert')
-        return
-
-    # call the FCM-MC function on next tick
-
-    fcmmc_cb = partial(excecute_fcmmc, doc)
-    doc.add_next_tick_callback(fcmmc_cb)

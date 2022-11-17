@@ -203,7 +203,7 @@ class MCarloFcm(object):
                 lamda,
                 lamda_autoslect,
                 self.VARIANCE_ON_ZERO_WEIGHTS,
-                True
+                True,
             )
         else:
             self.lamda, self.lambda_autoselect  = select_lambda(

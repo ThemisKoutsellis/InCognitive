@@ -194,7 +194,11 @@ def get_lag_matrix(source, target, lag, nodes_order, auto_lag):
 
     return lag_matrix
 
-def _calc_lambdas(W_star, variable_weights=False, var_on_zero_weights=False):
+def _calc_lambdas(
+    W_star,
+    weights_are_rand_var=False,
+    zero_weights_are_rand_var=False
+):
     """ This iternal function calculates all necessary norms of [1]
     and then the corresponding lambdas:
         1. l_s_prime,
@@ -209,11 +213,11 @@ def _calc_lambdas(W_star, variable_weights=False, var_on_zero_weights=False):
     ----------
     W_star : numpy array
         The FCM weight matrix for the non-input nodes.
-    variable_weights : bool
+    weights_are_rand_var : bool
         True if the weights are considered random variables. This
         functionality is necessary when the FCMs are combined with
         the Monte Carlo Simulation.
-    var_on_zero_weights : bool
+    zero_weights_are_rand_var : bool
         False if the zero value indicates no connection between the
         source and target node. True if there is a correlation between
         source and target node and the weights are considered random
@@ -234,8 +238,8 @@ def _calc_lambdas(W_star, variable_weights=False, var_on_zero_weights=False):
     """
 
     #a. W-2 norm
-    if variable_weights:
-        if var_on_zero_weights:
+    if weights_are_rand_var:
+        if zero_weights_are_rand_var:
             _W_star = np.ones((W_star.shape[0], W_star.shape[1]))
             w_norm_2 = LA.norm(_W_star, ord='fro')
         else:
@@ -245,8 +249,8 @@ def _calc_lambdas(W_star, variable_weights=False, var_on_zero_weights=False):
         w_norm_2 = LA.norm(W_star, ord='fro')
 
     #b. W-inf norm:
-    if variable_weights:
-        if var_on_zero_weights:
+    if weights_are_rand_var:
+        if zero_weights_are_rand_var:
             _W_star = np.ones((W_star.shape[0], W_star.shape[1]))
             w_norm_inf = LA.norm(_W_star, ord=np.inf)
         else:
@@ -270,10 +274,10 @@ def _calc_lambdas(W_star, variable_weights=False, var_on_zero_weights=False):
 
         return max(arg1, arg2)
 
-    def calc_s_norm(W, var_on_zero_weights, variable_weights=False):
+    def calc_s_norm(W, zero_weights_are_rand_var, weights_are_rand_var=False):
 
-        if variable_weights:
-            if var_on_zero_weights:
+        if weights_are_rand_var:
+            if zero_weights_are_rand_var:
                 _W = np.ones((W.shape[0], W.shape[1]))
                 row_s_norms = [row_s_norm(r) for r in _W]
                 result = max(row_s_norms)
@@ -287,7 +291,7 @@ def _calc_lambdas(W_star, variable_weights=False, var_on_zero_weights=False):
 
         return result
 
-    w_s_norm = calc_s_norm(W_star, var_on_zero_weights, variable_weights)
+    w_s_norm = calc_s_norm(W_star, zero_weights_are_rand_var, weights_are_rand_var)
 
     # Calculate all lambdas
     l_s_prime = 4/(w_norm_2)
@@ -305,8 +309,8 @@ def select_lambda(
     activation_function,
     lamda_value,
     lamda_autoslect,
-    var_on_zero_weights=False,
-    variable_weights=False,
+    zero_weights_are_rand_var=False,
+    weights_are_rand_var=False,
     ):
     """This function returns the FCM lambda paramater based on the
     methodology of [1].
@@ -328,11 +332,11 @@ def select_lambda(
     lamda_autoslect : bool
         If True, the function estimates the lambda parameter
         based on [1]. If False, the function return the lamda_value.
-    var_on_zero_weights : bool
+    zero_weights_are_rand_var : bool
         True if the zero weights are randon variables with distribution
         of zero mean. False if the zero value indicates no connection
         between source and target node. The default value is False.
-    variable_weights : bool
+    weights_are_rand_var : bool
         True if the weights are considered random variables. This
         functionality is necessary when the FCM are combined with
         the Monte Carlo Simulation approach. The default value is False.
@@ -354,7 +358,8 @@ def select_lambda(
         ### the W matrix without the rows of input nodes
         # a. get the index of non-steady nodes from 'nodes_order' list
         if input_nodes:
-            no_input_indexes = [i for i,v in enumerate(nodes_order) if v not in input_nodes]
+            no_input_indexes = [
+                i for i,v in enumerate(nodes_order) if v not in input_nodes]
         else:
             no_input_indexes = [i for i,v in enumerate(nodes_order)]
         # b. initialize the W_star matrix
@@ -365,7 +370,7 @@ def select_lambda(
 
         ### get all lambdas
         (l_s_prime, l_h_prime, l_s_star, l_h_star) = \
-            _calc_lambdas(W_star, variable_weights, var_on_zero_weights)
+            _calc_lambdas(W_star, weights_are_rand_var, zero_weights_are_rand_var)
 
         ### select lambda
         if activation_function=='sigmoid':

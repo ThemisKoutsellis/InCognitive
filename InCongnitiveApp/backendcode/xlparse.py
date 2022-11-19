@@ -114,6 +114,7 @@ def get_fcm_layout(df_nodes_order, df_fcm_topology, df_in_out_nodes):
             11. 'lags'
 
         """
+
     # initialize fcm_layout_dict dctionary
     fcm_layout_dict = {}
 

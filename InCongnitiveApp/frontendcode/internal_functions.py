@@ -29,6 +29,7 @@ __all__ = (
     'check_for_inconsistencies',
 )
 
+#######################################################################
 def display_msg(div, msg=' ', msg_type='alert'):
 
     def _show_msg():
@@ -45,46 +46,11 @@ def display_msg(div, msg=' ', msg_type='alert'):
 
     _show_msg()
 
-def _rearrange_nodes(node_data_df, input_nodes, output_nodes):
-    ''' This function rearrange the
-        circular layout nodes so that
-        the input nodes are aranges
-        to the middle-left of the graph
-        and the output nodes to the
-        middle-right part of the graph
-    '''
-
-    # rearrange coordinates
-    xs = list(node_data_df.iloc[:,0])
-    ys = list(node_data_df.iloc[:,1])
-    labels = list(node_data_df.iloc[:,2])
-
-    if xs:
-        zipped_node_coord = list(zip(xs, ys))
-        sorted_zip =  sorted(
-            zipped_node_coord, key = operator.itemgetter(0))
-        x_y_list = list(zip(*sorted_zip))
-        xs = list(x_y_list[0])
-        ys = list(x_y_list[1])
-
-    # rearrange labels
-    intermidiate_nodes = [
-        node for node in labels \
-            if (node not in input_nodes) and (node not in output_nodes)
-    ]
-    rearranged_labels = input_nodes + intermidiate_nodes + output_nodes
-
-    # create the output df
-    zipped = list(zip(xs, ys, rearranged_labels))
-    rearranged_node_data_df = pd.DataFrame(
-        zipped, columns=['x', 'y', 'index']
-    )
-
-    return rearranged_node_data_df
-
+#######################################################################
 def _ridge(category, data, scale=20):
     return list(zip([category]*len(data), scale*data))
 
+#######################################################################
 def plot_results(f, _x, node_mc_values, baseline_node_values):
 
     source = ColumnDataSource(data=dict())
@@ -137,6 +103,45 @@ def plot_results(f, _x, node_mc_values, baseline_node_values):
                     size=7, color="red"
                 )
 
+#######################################################################
+def _rearrange_nodes(node_data_df, input_nodes, output_nodes):
+    ''' This function rearrange the
+        circular layout nodes so that
+        the input nodes are aranges
+        to the middle-left of the graph
+        and the output nodes to the
+        middle-right part of the graph
+    '''
+
+    # rearrange coordinates
+    xs = list(node_data_df.iloc[:,0])
+    ys = list(node_data_df.iloc[:,1])
+    labels = list(node_data_df.iloc[:,2])
+
+    if xs:
+        zipped_node_coord = list(zip(xs, ys))
+        sorted_zip =  sorted(
+            zipped_node_coord, key = operator.itemgetter(0))
+        x_y_list = list(zip(*sorted_zip))
+        xs = list(x_y_list[0])
+        ys = list(x_y_list[1])
+
+    # rearrange labels
+    intermidiate_nodes = [
+        node for node in labels \
+            if (node not in input_nodes) and (node not in output_nodes)
+    ]
+    rearranged_labels = input_nodes + intermidiate_nodes + output_nodes
+
+    # create the output df
+    zipped = list(zip(xs, ys, rearranged_labels))
+    rearranged_node_data_df = pd.DataFrame(
+        zipped, columns=['x', 'y', 'index']
+    )
+
+    return rearranged_node_data_df
+
+#######################################################################
 def update_graph_renderer(fcm_layout_dict):
 
     input_nodes = fcm_layout_dict["input_nodes"]
@@ -164,7 +169,6 @@ def update_graph_renderer(fcm_layout_dict):
         fcm_layout_dict['output_nodes'],
     )
     initial_hv_graph.nodes.data = rearranged_node_data_df
-
 
     #position of bokeh nodes
     x, y = initial_hv_graph.nodes.array([0, 1]).T
@@ -242,6 +246,7 @@ def update_graph_renderer(fcm_layout_dict):
 
     return bokeh_graph_renderer, bokeh_labels_renderer
 
+#######################################################################
 def excecute_fcmmc(doc):
 
     # Execute FCM-MC Sim after passing the test of values inconsistency
@@ -323,6 +328,7 @@ def excecute_fcmmc(doc):
     display_msg(alert_msg_div, msg='', msg_type='success')
     return
 
+#######################################################################
 def _display_last_exec_msg(doc, _error_str, _lambda_div_str):
 
     lambda_div = doc.get_model_by_name('lambda_div')
@@ -332,6 +338,7 @@ def _display_last_exec_msg(doc, _error_str, _lambda_div_str):
     display_msg(lambda_div, msg=_error_str, msg_type='alert')
     return
 
+#######################################################################
 def _check_lambdas(doc):
     nodes_order = doc.fcm_layout_dict['nodes_order']
     input_nodes = doc.fcm_layout_dict['input_nodes']
@@ -388,7 +395,7 @@ def _check_lambdas(doc):
 
     return lambda_is_OK, max_accepted_lambda
 
-
+#######################################################################
 def _check_initial_input_node_values(doc):
 
     _initial_values = doc.fcm_layout_dict['initial_values']
@@ -418,6 +425,7 @@ def _check_initial_input_node_values(doc):
             initial_input_node_values_are_within_accepted_range,
             initial_input_node_values_are_float)
 
+#######################################################################
 def _check_initial_weight_values(doc):
 
     _initial_weight_values = doc.fcm_layout_dict['weights']
@@ -443,6 +451,7 @@ def _check_initial_weight_values(doc):
     return (initial_weight_values_are_within_accepted_range,
             initial_weight_values_are_floats)
 
+#######################################################################
 def check_for_inconsistencies(doc):
     # get necessary widgets
     lambda_div = doc.get_model_by_name('lambda_div')
@@ -531,3 +540,12 @@ def check_for_inconsistencies(doc):
         display_last_exec_msg_cb = partial(
             _display_last_exec_msg, doc, _error_str, _error_str)
         doc.add_next_tick_callback(display_last_exec_msg_cb)
+
+
+#######################################################################
+def _update_fcm_layout_dict_from_CDSs(doc):
+    doc.nodes_CDS
+    doc.edges_CDS
+
+    return doc.fcm_layout_dict
+

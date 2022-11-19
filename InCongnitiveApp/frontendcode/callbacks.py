@@ -2,15 +2,17 @@
 
 import io
 import numpy as np
+import pandas as pd
 from base64 import b64decode
 from functools import partial
+from time import sleep
 
 from bokeh.models import ColumnDataSource
 
 # import internal modules
 from frontendcode.parsers import parse_input_xlsx
 from frontendcode.internal_functions import (
-    display_msg, excecute_fcmmc, check_for_inconsistencies)
+    display_msg, check_for_inconsistencies)
 
 __all__ = (
     '_set_iter_when_weights_vary',
@@ -28,6 +30,9 @@ __all__ = (
     '_collect_global_var',
     '_del_edges_cds_rows',
     '_del_nodes_cds_rows',
+    '_add_node_cds_row',
+    '_add_edge_cds_row',
+    '_update_fcm_layout_dict',
 )
 
 #######################################################################
@@ -213,6 +218,60 @@ def _clear_allert_msg_div(attr, old, new, doc):
         display_msg(lambda_div)
 
 #######################################################################
+def _add_edge_cds_row(doc):
+    _edges_df = doc.edges_CDS.to_df()
+
+    _edges_data = {
+        'source': [np.nan],
+        'target': [np.nan],
+        'weight': [np.nan],
+    }
+    _edges_empty_df = pd.DataFrame(_edges_data)
+    _edges_df = pd.concat(
+        [_edges_df, _edges_empty_df],
+        ignore_index = True
+    )
+
+    #Change the doc.CDS
+    doc.edges_CDS.data = doc.edges_CDS.from_df(_edges_df)
+
+    if 'index' in doc.nodes_CDS.data:
+            del doc.nodes_CDS.data['index']
+    if 'index' in doc.edges_CDS.data:
+            del doc.edges_CDS.data['index']
+
+    # Uncheck the rest of DataTable rows
+    doc.nodes_CDS.selected.indices = []
+    doc.edges_CDS.selected.indices = []
+
+#######################################################################
+def _add_node_cds_row(doc):
+    _nodes_df = doc.nodes_CDS.to_df()
+    _nodes_data = {
+        'name': [np.nan],
+        'desc': [np.nan],
+        'type': [np.nan],
+        'initial value': [np.nan],
+    }
+    _nodes_empty_df = pd.DataFrame(_nodes_data)
+    _nodes_df = pd.concat(
+        [_nodes_df, _nodes_empty_df],
+        ignore_index = True
+    )
+
+    #Change the doc.CDS
+    doc.nodes_CDS.data = doc.nodes_CDS.from_df(_nodes_df)
+
+    if 'index' in doc.nodes_CDS.data:
+            del doc.nodes_CDS.data['index']
+    if 'index' in doc.edges_CDS.data:
+            del doc.edges_CDS.data['index']
+
+    # Uncheck the rest of DataTable rows
+    doc.nodes_CDS.selected.indices = []
+    doc.edges_CDS.selected.indices = []
+
+#######################################################################
 def _del_edges_cds_rows(doc):
     if 'index' in doc.edges_CDS.data:
         del doc.edges_CDS.data['index']
@@ -248,82 +307,39 @@ def _del_nodes_cds_rows(doc):
     _nodes_to_delete = [_nodes_df.iloc[i,0] for i in _node_rows_to_del]
     #print('_rows_to_del= ', _node_rows_to_del)
     # 2. Edges DataTable
-    _edges_to_delete_idx = []
-    for _node in _nodes_to_delete:
-        pass
+    if doc.edges_CDS.data:
 
-
-
-
-
-
-
-
-
-
-
-
+        _edges_to_delete_idx = []
+        for _node in _nodes_to_delete:
+            _idx_list1 = _edges_df.index[_edges_df['source'] == _node].tolist()
+            _edges_to_delete_idx = [*_edges_to_delete_idx, *_idx_list1]
+            _idx_list2 = _edges_df.index[_edges_df['target'] == _node].tolist()
+            _edges_to_delete_idx = [*_edges_to_delete_idx, *_idx_list2]
+        _edges_to_delete_idx = list(set(_edges_to_delete_idx))
+    else:
+        _edges_to_delete_idx = []
     # Deleting rows from both DataTables
     # ----------------------------------
-    print('_nodes_df= \n', _nodes_df.head(2))
     _nodes_df.drop(_node_rows_to_del, inplace=True)
-    print()
-    print('_nodes_df= \n', _nodes_df.head(2))
+    _edges_df.drop(_edges_to_delete_idx, inplace=True)
+
     #Change the doc.CDS
     doc.nodes_CDS.data = doc.nodes_CDS.from_df(_nodes_df)
+    doc.edges_CDS.data = doc.edges_CDS.from_df(_edges_df)
+
     if 'index' in doc.nodes_CDS.data:
             del doc.nodes_CDS.data['index']
-    print()
-    print('doc.nodes_CDS=', doc.nodes_CDS.data)
-    print('========================================')
+    if 'index' in doc.edges_CDS.data:
+            del doc.edges_CDS.data['index']
+
     # Uncheck the rest of DataTable rows
     doc.nodes_CDS.selected.indices = []
     doc.edges_CDS.selected.indices = []
 
-
-    #_edges_cds  = doc.edges_CDS
-    #if 'index' in _edges_cds.data:
-    #    del _edges_cds.data['index']
-    #_edges_df = _edges_cds.to_df()
-    #_nodes_to_delete = [_nodes_df.iloc[i,0] for i in _rows_to_del]
-    #print('_nodes_to_delete=', _nodes_to_delete)
-    #_edges_to_delete_idx = []
-    #for _node in _nodes_to_delete:
-    #    _idx_list1 = _edges_df.index[_edges_df['source'] == _node].tolist()
-    #    _edges_to_delete_idx = [*_edges_to_delete_idx, *_idx_list1]
-    #    _idx_list2 = _edges_df.index[_edges_df['target'] == _node].tolist()
-    #    _edges_to_delete_idx = [*_edges_to_delete_idx, *_idx_list2]
-    #    _edges_to_delete_idx = list(set(_edges_to_delete_idx))
-    #print('_edges_to_delete_idx=', _edges_to_delete_idx)
-
-    # deleting rows from both DataTables
-    #_nodes_df.drop(_rows_to_del, inplace=True)
-    #print(_nodes_df)
-    #_nodes_cds = ColumnDataSource(_nodes_df)
-
-    #_edges_df.drop(_edges_to_delete_idx, inplace=True)
-    #doc.edges_CDS = ColumnDataSource(_nodes_df)
-
-    #if 'index' in _edges_cds.data:
-    #    del doc.edges_CDS.data['index']
-    #if 'index' in _nodes_cds.data:
-    #    print(_nodes_cds.data)
-    #    del _nodes_cds.data['index']
-
-    #print('AFTER deleting')
-    #print(doc.nodes_CDS.data)
-    #print(doc.edges_CDS.data)
-    #print('======================================')
-    #print()
-    #print()
-
-
-    #_edges_cds.selected.indices = []
-
 #######################################################################
 def _collect_global_var(doc):
 
-    print(doc.fcm_layout_dict)
+    #print(doc.fcm_layout_dict)
     f1 = doc.get_model_by_name('f1')
     f2 = doc.get_model_by_name('f2')
     f3 = doc.get_model_by_name('f3')
@@ -341,3 +357,124 @@ def _collect_global_var(doc):
     # check for inconsistencies
     check_incons_cb = partial(check_for_inconsistencies, doc)
     doc.add_next_tick_callback(check_incons_cb)
+
+#######################################################################
+def _update_fcm_dict(_dict, _nodes_CDS, _edges_CDS):
+
+    _nodes_order = list(_nodes_CDS.data['name'])
+    _nodes_discription = list(_nodes_CDS.data['desc'])
+    _initial_values = list(_nodes_CDS.data['initial value'])
+
+    if _edges_CDS.data:
+        _source_nodes = list(_edges_CDS.data['source'])
+        _target_nodes = list(_edges_CDS.data['target'])
+        _weights = list(_edges_CDS.data['weight'])
+        _lags = [1]*len(_weights)
+
+    _auto_lags = [1]*len(_nodes_order)
+
+
+    _nodes_type = list(_nodes_CDS.data['type'])
+    # correct input values of node type
+    _nodes_type = [
+        'Intermediate' if item == 'intermediate' else item for item in _nodes_type]
+    _nodes_type = [
+        'Output' if item == 'output' else item for item in _nodes_type]
+    _nodes_type = [
+        'Input' if item == 'input' else item for item in _nodes_type]
+    _nodes_type = [
+        'Intermediate' if item == np.nan else item for item in _nodes_type]
+    _valid_types = [
+        'Intermediate',
+        'intermediate',
+        'Output',
+        'output',
+        'Input',
+        'input',
+    ]
+    _nodes_type = [
+        'Intermediate' if item not in _valid_types \
+        else item for item in _nodes_type
+    ]
+
+    # Check for NaN values in all columns of DataTable
+    no_NaN = True
+    if 'nan' in np.nan_to_num(_nodes_order):
+        no_NaN = False
+    if 'nan' in np.nan_to_num(_nodes_discription):
+        no_NaN = False
+    if 'nan' in np.nan_to_num(_initial_values):
+        no_NaN = False
+
+    if _edges_CDS.data:
+        if 'nan' in np.nan_to_num(_source_nodes):
+            no_NaN = False
+        if 'nan' in np.nan_to_num(_target_nodes):
+            no_NaN = False
+        if 'nan' in np.nan_to_num(_weights):
+            no_NaN = False
+
+    # -------------------------------------------------------
+    if no_NaN:
+        _dict['nodes_order'] = _nodes_order
+        _dict['nodes_discription'] = _nodes_discription
+        #_dict['auto_weights'] =
+        _dict['auto_lags'] = _auto_lags
+        _dict['initial_values'] = _initial_values
+        #_dict['input_nodes'] =
+        #_dict['output_nodes'] =
+        if _edges_CDS.data:
+            _dict['source_nodes'] = _source_nodes
+            _dict['target_nodes'] = _target_nodes
+            _dict['weights'] = _weights
+            _dict['lags'] = _lags
+        else:
+            _dict['source_nodes'] = []
+            _dict['target_nodes'] = []
+            _dict['weights'] = []
+            _dict['lags'] = []
+
+        print('UP_DATE DICT')
+        print(_dict)
+        print('========================================================================')
+        print()
+
+    return _dict
+
+#######################################################################
+def _update_fcm_layout_dict(attr, old, new, doc, who):
+    _nodes_CDS = doc.nodes_CDS
+    _edges_CDS = doc.edges_CDS
+    _dict = doc.fcm_layout_dict
+    if who == 'nodesCDS':
+        sleep(0.2)
+        if _nodes_CDS.data:
+            if 'index' in _nodes_CDS.data:
+                del _nodes_CDS.data['index']
+            if 'index' in _edges_CDS.data:
+                del _edges_CDS.data['index']
+
+            print('Begining nodesCDS:')
+            print('_edges_CDS.data: ',_edges_CDS.data )
+            print('_edges_CDS.data: ',_edges_CDS.data )
+            print('------------------------------------')
+
+            doc.fcm_layout_dict = _update_fcm_dict(
+                _dict, _nodes_CDS, _edges_CDS
+            )
+    elif who == 'edgesCDS':
+        if _nodes_CDS.data and _edges_CDS.data:
+            if 'index' in _nodes_CDS.data:
+                del _nodes_CDS.data['index']
+            if 'index' in _edges_CDS.data:
+                del _edges_CDS.data['index']
+
+            print('Begining edgesCDS:')
+            print('_edges_CDS.data: ',_edges_CDS.data )
+            print('_edges_CDS.data: ',_edges_CDS.data )
+            print('------------------------------------')
+
+            doc.fcm_layout_dict = _update_fcm_dict(
+                _dict, _nodes_CDS, _edges_CDS
+            )
+

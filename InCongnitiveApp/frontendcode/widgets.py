@@ -3,9 +3,8 @@
 from bokeh.plotting import figure
 from bokeh.models.widgets import FileInput, NumberEditor
 from bokeh.models import (
-    Div, Button, Spinner, CheckboxGroup, Select,
-    Panel, Tabs, FactorRange, TableColumn,
-    DataTable, BoxZoomTool, PanTool, ResetTool,
+    Div, Button, Spinner, CheckboxGroup, Select, Panel, Tabs,
+    FactorRange, TableColumn, BoxZoomTool, PanTool, ResetTool,
     HoverTool, TapTool, WheelZoomTool, SaveTool,
 )
 
@@ -125,8 +124,8 @@ nodes_columns = [
     TableColumn(field="desc", title="Node description"),
     TableColumn(field="type",
                 title="Node type [Input/Intermediate/Output]"),
-    TableColumn(field="initial value",
-                title="Initial value", editor=NumberEditor()),
+    TableColumn(field="initial value",title="Initial value",
+                editor=NumberEditor()),
 ]
 
 nodes_data_table_title = Div(
@@ -358,4 +357,3 @@ save_bn = Button(
     label="Save layout to xlsx format",
     button_type="success", width=550,
 )
-

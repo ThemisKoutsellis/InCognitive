@@ -53,10 +53,6 @@ current_doc.autoslect_lambda = True
 current_doc.nodes_CDS = ColumnDataSource()
 current_doc.edges_CDS = ColumnDataSource()
 
-current_doc.input_nodes_CDS = ColumnDataSource()
-current_doc.interm_nodes_CDS = ColumnDataSource()
-current_doc.output_nodes_CDS = ColumnDataSource()
-
 current_doc.output_nodes_mc_values = {}
 
 # ---------------------------------------------------------------------
@@ -177,15 +173,25 @@ execute_btn.on_click(clear_allert_msg_div_cb)
 clear_allert_msg_div_cb = partial(_collect_global_var, doc=current_doc)
 execute_btn.on_click(clear_allert_msg_div_cb)
 
-#add_edge_row.on_click()
+add_edge_cds_row_cb = partial(_add_edge_cds_row, doc=current_doc)
+add_edge_row.on_click(add_edge_cds_row_cb)
 
 del_edges_cb = partial(_del_edges_cds_rows, doc=current_doc)
 del_edge_row.on_click(del_edges_cb)
 
-#add_node_row.on_click()
+add_node_cds_row_cb = partial(_add_node_cds_row, doc=current_doc)
+add_node_row.on_click(add_node_cds_row_cb)
 
 del_nodes_cb = partial(_del_nodes_cds_rows, doc=current_doc)
 del_node_row.on_click(del_nodes_cb)
+
+nodes_CDS_changed_cb = partial(
+    _update_fcm_layout_dict, doc=current_doc, who='nodesCDS')
+current_doc.nodes_CDS.on_change('data',nodes_CDS_changed_cb)
+
+edges_CDS_changed_cb = partial(
+    _update_fcm_layout_dict, doc=current_doc, who='edgesCDS')
+current_doc.edges_CDS.on_change('data',edges_CDS_changed_cb)
 
 # ---------------------------------------------------------------------
 # Initialize doc   ----------------------------------------------------

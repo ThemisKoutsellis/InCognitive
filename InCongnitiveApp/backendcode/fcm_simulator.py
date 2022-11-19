@@ -93,8 +93,6 @@ def _fcm_generator(
                     A_next[key] = F(lamda, _argument)
                     _Arguments[key] = _argument
 
-
-
         # Append A_next to A:
         [A[key].append(A_next[key]) for key in A.keys()]
 

@@ -6,12 +6,14 @@ import numpy as np
 
 import networkx as nx
 from functools import partial
+import matplotlib as mplt
 import matplotlib.pyplot as plt
 from scipy.stats.kde import gaussian_kde
 
 # bokeh & holoviews imports
 import holoviews as hv
 hv.extension('bokeh')
+from holoviews.core.dimension import Dimension
 
 from bokeh.models import ColumnDataSource
 
@@ -20,17 +22,17 @@ from backendcode.fcmmc_simulation import monte_carlo_simulation
 from backendcode.fcm_layout_parameters import (
     select_lambda, get_nx_graph, get_w_matrix)
 
-
 __all__ = (
-    'plot_results',
-    'display_msg',
-    'update_graph_renderer',
-    'excecute_fcmmc',
-    'check_for_inconsistencies',
+    '_plot_results',
+    '_display_msg',
+    '_update_graph_renderer',
+    '_excecute_fcmmc',
+    '_check_for_inconsistencies',
+    '_update_fcm_dict',
 )
 
 #######################################################################
-def display_msg(div, msg=' ', msg_type='alert'):
+def _display_msg(div, msg=' ', msg_type='alert'):
 
     def _show_msg():
         div.text = str(msg)
@@ -142,44 +144,39 @@ def _rearrange_nodes(node_data_df, input_nodes, output_nodes):
     return rearranged_node_data_df
 
 #######################################################################
-def update_graph_renderer(fcm_layout_dict):
+def _update_graph_renderer(fcm_layout_dict):
+
+    nodes_order_list = fcm_layout_dict["nodes_order"]
+    nodes_discription = fcm_layout_dict["nodes_discription"]
 
     input_nodes = fcm_layout_dict["input_nodes"]
     output_nodes = fcm_layout_dict["output_nodes"]
-
-    nodes_discription = fcm_layout_dict["nodes_discription"]
     source_nodes = fcm_layout_dict['source_nodes']
     target_nodes = fcm_layout_dict['target_nodes']
-    nodes_order_list = fcm_layout_dict["nodes_order"]
-
+    weights = fcm_layout_dict['weights']
     nx_graph = get_nx_graph(
-        fcm_layout_dict['source_nodes'],
-        fcm_layout_dict['target_nodes'],
-        fcm_layout_dict['weights'],
+        nodes_order_list,
+        source_nodes,
+        target_nodes,
+        weights
     )
-
     initial_hv_graph = hv.Graph.from_networkx(
         nx_graph, nx.layout.circular_layout
     )
-
-    # rearrenge show that the Input nodes appear first to the left
+    # rearrenge so that the input-nodes appear firsts, to the left.
     rearranged_node_data_df = _rearrange_nodes(
         initial_hv_graph.nodes.data,
-        fcm_layout_dict['input_nodes'],
-        fcm_layout_dict['output_nodes'],
+        input_nodes,
+        output_nodes,
     )
     initial_hv_graph.nodes.data = rearranged_node_data_df
-
     #position of bokeh nodes
     x, y = initial_hv_graph.nodes.array([0, 1]).T
     # labels are in the order of x,y, point
     labels = list(initial_hv_graph.nodes.array([2]).T[0])
-
     # internal naming of nodes
     node_indices = list(range(0, len(fcm_layout_dict["nodes_order"])))
-
     # type of node: i) input, ii) intermediate, iii) output
-
     node_type = []
     for node in labels:
         if node in input_nodes:
@@ -188,53 +185,62 @@ def update_graph_renderer(fcm_layout_dict):
             node_type.append('Output node')
         else:
             node_type.append('Intermediate node')
-
     # get the index lists of source and target nodes
     source_nodes_idx = []
     for el in source_nodes:
         index = labels.index(el)
         source_nodes_idx.append(index)
-
     target_nodes_idx = []
     for el in target_nodes:
         index = labels.index(el)
         target_nodes_idx.append(index)
-
     weights = fcm_layout_dict['weights']
 
     # Renderers
+    # -----------------------------------------------------------------
     hv_nodes = hv.Nodes(
         (x, y, node_indices, node_type, labels),
         vdims=['Type', 'Labels'],
     )
+
     hv_graph = hv.Graph(
         (
             (source_nodes_idx, target_nodes_idx, weights),
             hv_nodes,
             #edgepaths,
         ),
-        vdims='Weight'
+        vdims=hv.Dimension('Weight', range=(-1, 1))
     )
-    # hvgraph options
+    print(hv_graph.vdims)
+
+   # hvgraph options
     hv_graph.opts(
         directed=True,
-        node_size=30,
-        arrowhead_length=0.03,
-        inspection_policy='edges',  # nodes
-        selection_policy='nodes',  # edges
+        node_size=20,
+        arrowhead_length=0.017,
+        inspection_policy='edges',
+        selection_policy='nodes',
         edge_hover_line_color='green',
         node_hover_fill_color='green',
-        edge_cmap=plt.cm.Blues,
+        edge_cmap=plt.cm.RdYlBu,
         node_cmap='Set1',
         cmap='brg',
         edge_color='Weight',
         node_color='Type',
-        edge_line_width=2,
+        edge_line_width=1.4,
     )
 
     # convert hv labels to bokeh labels renderer object
     hv_labels_renderer = hv.Labels(hv_nodes, ['x', 'y'], 'Labels')
-    hv_labels_renderer.opts(bgcolor='black')
+
+    hv_labels_renderer.opts(
+        bgcolor='black',
+        text_font_size='10pt',
+        xoffset=0.07,
+        yoffset=0.05,
+        #height=40,
+        #width=400,
+        )
 
     bokeh_labels_fig = hv.render(hv_labels_renderer)
     bokeh_labels_fig_renderers = bokeh_labels_fig.renderers
@@ -247,7 +253,7 @@ def update_graph_renderer(fcm_layout_dict):
     return bokeh_graph_renderer, bokeh_labels_renderer
 
 #######################################################################
-def excecute_fcmmc(doc):
+def _excecute_fcmmc(doc):
 
     # Execute FCM-MC Sim after passing the test of values inconsistency
     ###################################################################
@@ -324,8 +330,8 @@ def excecute_fcmmc(doc):
         'Execution ended successfully!'
         ' Transfer function: λ = {0}'.format(mc_lambda)
     )
-    display_msg(lambda_div, msg=_error_str, msg_type='success')
-    display_msg(alert_msg_div, msg='', msg_type='success')
+    _display_msg(lambda_div, msg=_error_str, msg_type='success')
+    _display_msg(alert_msg_div, msg='', msg_type='success')
     return
 
 #######################################################################
@@ -334,8 +340,8 @@ def _display_last_exec_msg(doc, _error_str, _lambda_div_str):
     lambda_div = doc.get_model_by_name('lambda_div')
     alert_msg_div = doc.get_model_by_name('alert_msg_div')
 
-    display_msg(alert_msg_div, msg=_error_str, msg_type='alert')
-    display_msg(lambda_div, msg=_error_str, msg_type='alert')
+    _display_msg(alert_msg_div, msg=_error_str, msg_type='alert')
+    _display_msg(lambda_div, msg=_error_str, msg_type='alert')
     return
 
 #######################################################################
@@ -352,6 +358,7 @@ def _check_lambdas(doc):
     else:
         weights_are_rand_var = False
     nx_graph = get_nx_graph(
+        doc.fcm_layout_dict['nodes_order'],
         doc.fcm_layout_dict['source_nodes'],
         doc.fcm_layout_dict['target_nodes'],
         doc.fcm_layout_dict['weights'],
@@ -384,7 +391,6 @@ def _check_lambdas(doc):
             zero_weights_are_rand_var,
             weights_are_rand_var,
         )
-        print('>> Accepted_lambda {0}'.format(max_accepted_lambda))
         if max_accepted_lambda < doc.lamda:
             lambda_is_OK = False
         else:
@@ -429,7 +435,6 @@ def _check_initial_input_node_values(doc):
 def _check_initial_weight_values(doc):
 
     _initial_weight_values = doc.fcm_layout_dict['weights']
-    print(_initial_weight_values)
     initial_weight_values_are_floats = False
 
     try:
@@ -452,7 +457,7 @@ def _check_initial_weight_values(doc):
             initial_weight_values_are_floats)
 
 #######################################################################
-def check_for_inconsistencies(doc):
+def _check_for_inconsistencies(doc):
     # get necessary widgets
     lambda_div = doc.get_model_by_name('lambda_div')
     alert_msg_div = doc.get_model_by_name('alert_msg_div')
@@ -511,7 +516,6 @@ def check_for_inconsistencies(doc):
             'initial input-node-values are NaN.'
         )
     elif not initial_input_node_values_are_within_accepted_range:
-        print(doc.trans_func)
         _error_str = ('[ERROR] The transfer function is: {0}. '
             'Some, or all, of the initial node values are out of'
             ' range, {1}.'.format(doc.trans_func, range_str)
@@ -530,22 +534,263 @@ def check_for_inconsistencies(doc):
         _error_str = 'Please wait ...'
         proceed = True
 
-    display_msg(lambda_div, msg=_error_str, msg_type='alert')
+    _display_msg(lambda_div, msg=_error_str, msg_type='alert')
 
     # call the FCM-MC function on next tick
     if proceed:
-        fcmmc_cb = partial(excecute_fcmmc, doc)
+        fcmmc_cb = partial(_excecute_fcmmc, doc)
         doc.add_next_tick_callback(fcmmc_cb)
     else:
         display_last_exec_msg_cb = partial(
             _display_last_exec_msg, doc, _error_str, _error_str)
         doc.add_next_tick_callback(display_last_exec_msg_cb)
 
+#######################################################################
+def _check_for_missing_nodes(doc):
+    if doc.deleting_rows_from_nodes_DataTable:
+        _missing_nodes = []
+    else:
+        # get the necessery lists to compare
+        _nodes_df = doc.nodes_CDS.to_df()
+        _nodes_df = _nodes_df.copy()
+        _edges_df = doc.edges_CDS.to_df()
+        _edges_df = _edges_df.copy()
+
+        if not _edges_df.empty:
+            _nodes_in_edges_DataTable = [
+                *list(_edges_df['source']),
+                *list(_edges_df['target']),
+            ]
+            _nodes_in_edges_DataTable = [
+                x for x in _nodes_in_edges_DataTable \
+                if isinstance(x,str) and x!='NaN'
+            ]
+            _nodes_in_edges_DataTable = list(set(_nodes_in_edges_DataTable))
+
+            if not _nodes_df.empty:
+                _nodes_in_nodes_DataTable = list(_nodes_df['name'])
+                _nodes_in_nodes_DataTable = [
+                    x for x in _nodes_in_nodes_DataTable \
+                    if isinstance(x,str) and x!='NaN'
+                ]
+            else:
+                _nodes_in_nodes_DataTable = []
+
+            # check for missing nodes
+            _missing_nodes = [
+                x for x in _nodes_in_edges_DataTable \
+                if x not in _nodes_in_nodes_DataTable
+            ]
+        else:
+            _missing_nodes = []
+
+    return _missing_nodes
 
 #######################################################################
-def _update_fcm_layout_dict_from_CDSs(doc):
-    doc.nodes_CDS
-    doc.edges_CDS
+def _del_some_of_nan_rows(doc):
+    _nodes_with_nan_df = doc.nodes_CDS.to_df()
+    _nodes_with_nan_df = _nodes_with_nan_df.copy()
+    _edges_with_nan_df = doc.edges_CDS.to_df()
+    _edges_with_nan_df = _edges_with_nan_df.copy()
+    # delete the NaN values (not all)
+    if not _nodes_with_nan_df.empty:
+        _nodes_with_nan_df = _nodes_with_nan_df[
+            _nodes_with_nan_df.name != 'NaN']
+    if not _edges_with_nan_df.empty:
+        indexNames = _edges_with_nan_df[
+            (_edges_with_nan_df['source'] == 'NaN') & \
+            (_edges_with_nan_df['target'] == 'NaN')
+        ].index
+        _edges_with_nan_df.drop(indexNames , inplace=True)
+        indexNames = _edges_with_nan_df[
+            (_edges_with_nan_df['source'] == 'NaN') | \
+            (_edges_with_nan_df['target'] == 'NaN')
+        ].index
+        _edges_with_nan_df.drop(indexNames , inplace=True)
 
-    return doc.fcm_layout_dict
+    return _nodes_with_nan_df, _edges_with_nan_df
 
+#######################################################################
+def _add_missing_nodes(doc, _missing_nodes):
+    _nodes_df = doc.nodes_CDS.to_df()
+    _nodes_df = _nodes_df.copy()
+
+    # add missing nodes in Nodes-DataTable.
+    _nodes_data = {
+        'name': [],
+        'desc': [],
+        'type': [],
+        'initial value': [],
+        'auto-weight': [],
+    }
+
+    for _node in _missing_nodes:
+        _nodes_data['name'].append(_node)
+        _nodes_data['desc'].append('NaN')
+        _nodes_data['type'].append('NaN')
+        _nodes_data['initial value'].append(np.nan)
+        _nodes_data['auto-weight'].append(np.nan)
+
+    _new_nodes_df = pd.DataFrame(_nodes_data)
+    _nodes_df = pd.concat(
+        [_nodes_df, _new_nodes_df],
+        ignore_index = True
+    )
+    #Change the doc.CDS
+    doc.nodes_CDS.data = doc.nodes_CDS.from_df(_nodes_df)
+    # delete the 'index' column.
+    # It causes errors in other parts of the code.
+    if 'index' in doc.nodes_CDS.data or doc.edges_CDS.data:
+        doc.dont_update_fcm_layout_dict = True
+        if 'index' in doc.nodes_CDS.data:
+            del doc.nodes_CDS.data['index']
+        elif  'index' in doc.edges_CDS.data:
+            del doc.edges_CDS.data['index']
+        doc.dont_update_fcm_layout_dict = False
+
+    # Uncheck the rest of DataTable rows
+    doc.nodes_CDS.selected.indices = []
+    doc.edges_CDS.selected.indices = []
+
+    return None
+
+#######################################################################
+def _fill_the_fcm_layout_dict(
+    _dict,
+    nodes_with_nan_df,
+    edges_with_nan_df,
+):
+    _nodes_df = nodes_with_nan_df
+    _edges_df = edges_with_nan_df
+
+    _nodes_order = list(_nodes_df['name'])
+    _nodes_discription = list(_nodes_df['desc'])
+    _initial_values = list(_nodes_df['initial value'])
+    _auto_weights = list(_nodes_df['auto-weight'])
+    _auto_lags = [1]*len(_nodes_order)
+    _nodes_type = list(_nodes_df['type'])
+    # correct input values of node type
+    _nodes_type = [
+        'Intermediate' if item == 'intermediate' \
+            else item for item in _nodes_type
+    ]
+    _nodes_type = [
+        'Output' if item == 'output' \
+        else item for item in _nodes_type
+    ]
+    _nodes_type = [
+        'Input' if item == 'input' \
+        else item for item in _nodes_type
+    ]
+    _nodes_type = [
+        'Intermediate' if item == np.nan \
+        else item for item in _nodes_type
+    ]
+    _valid_types = [
+        'Intermediate',
+        'intermediate',
+        'Output',
+        'output',
+        'Input',
+        'input',
+    ]
+    _nodes_type = [
+        'Intermediate' if item not in _valid_types \
+        else item for item in _nodes_type
+    ]
+    _input_nodes = [
+        v for i, v in enumerate(_nodes_order) \
+        if _nodes_type[i]=='Input'
+    ]
+    _output_nodes = [
+        v for i, v in enumerate(_nodes_order) \
+        if _nodes_type[i]=='Output'
+    ]
+
+    if not _edges_df.empty:
+        _source_nodes = list(_edges_df['source'])
+        _target_nodes = list(_edges_df['target'])
+        _weights = list(_edges_df['weight'])
+        _lags = [1]*len(_weights)
+    else:
+        _source_nodes = []
+        _target_nodes = []
+        _weights = []
+        _lags = []
+
+    # Check for NaN values in all DataTable columns
+    no_NaN = True
+    if 'nan' in np.nan_to_num(_nodes_order):
+        no_NaN = False
+    if 'nan' in np.nan_to_num(_nodes_discription):
+        no_NaN = False
+    if 'nan' in np.nan_to_num(_initial_values):
+        no_NaN = False
+
+    if not _edges_df.empty:
+        if 'nan' in np.nan_to_num(_source_nodes):
+            no_NaN = False
+        if 'nan' in np.nan_to_num(_target_nodes):
+            no_NaN = False
+        if 'nan' in np.nan_to_num(_weights):
+            no_NaN = False
+    # -------------------------------------------------------
+    if no_NaN:
+        _dict['nodes_order'] = _nodes_order
+        _dict['nodes_discription'] = _nodes_discription
+        _dict['auto_weights'] = _auto_weights
+        _dict['auto_lags'] = _auto_lags
+        _dict['initial_values'] = _initial_values
+
+        _dict['input_nodes'] = _input_nodes
+        _dict['output_nodes'] = _output_nodes
+
+        _dict['source_nodes'] = _source_nodes
+        _dict['target_nodes'] = _target_nodes
+        _dict['weights'] = _weights
+        _dict['lags'] = _lags
+    else:
+        # TODO: replace NaN with None
+        pass
+
+    return _dict
+
+#######################################################################
+def _update_fcm_dict(doc, _dict):
+
+    # check if all nodes on edges DataTable exist in Nodes-DataTable
+    # too. if not, then add the corresponding rows to Nodes-DataTable.
+    # ----------------------------------
+    _missing_nodes = _check_for_missing_nodes(doc)
+
+    if _missing_nodes:
+        _add_missing_nodes(doc, _missing_nodes)
+        # after the above command the _update_fcm_dict
+        # will be called again because the CDS changed!
+        # in the second invokation, the following 'else'
+        # statement will be executed.
+    else:
+        (_nodes_with_nan_df,
+         _edges_with_nan_df,
+        ) = _del_some_of_nan_rows(doc)
+
+        fcm_plot = doc.get_model_by_name('fcm_plot')
+
+        if _nodes_with_nan_df.empty:
+            _dict = {}
+            fcm_plot.renderers = []
+        else:
+            _dict = _fill_the_fcm_layout_dict(
+                _dict,
+                _nodes_with_nan_df,
+                _edges_with_nan_df,
+            )
+            (graph_renderer,
+             labels_renderer
+            ) = _update_graph_renderer(_dict)
+            fcm_plot.renderers = []
+            fcm_plot.renderers = [graph_renderer, labels_renderer]
+
+        print('_dict = ', _dict)
+
+    return _dict

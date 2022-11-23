@@ -1,7 +1,7 @@
 # widgets.py
 
 from bokeh.plotting import figure
-from bokeh.models.widgets import FileInput, NumberEditor
+from bokeh.models.widgets import FileInput, NumberEditor, TextEditor
 from bokeh.models import (
     Div, Button, Spinner, CheckboxGroup, Select, Panel, Tabs,
     FactorRange, TableColumn, BoxZoomTool, PanTool, ResetTool,
@@ -120,11 +120,20 @@ upload_xlsx_wgt = FileInput(
 
 # Nodes DataTable:
 nodes_columns = [
-    TableColumn(field="name", title="Node name"),
-    TableColumn(field="desc", title="Node description"),
+    TableColumn(field="name",
+                title="Node name",
+                editor=TextEditor()),
+    TableColumn(field="desc",
+                title="Node description",
+                editor=TextEditor()),
     TableColumn(field="type",
-                title="Node type [Input/Intermediate/Output]"),
-    TableColumn(field="initial value",title="Initial value",
+                title="Node type [Input/Intermediate/Output]",
+                editor=TextEditor()),
+    TableColumn(field="initial value",
+                title="Initial value",
+                editor=NumberEditor()),
+    TableColumn(field="auto-weight",
+                title="Auto-weight",
                 editor=NumberEditor()),
 ]
 
@@ -146,9 +155,15 @@ del_node_row = Button(
 
 # Node interconnections DataTable:
 edges_columns = [
-    TableColumn(field="source", title="Source node"),
-    TableColumn(field="target", title="Target node"),
-    TableColumn(field="weight", title="Weight", editor=NumberEditor()),
+    TableColumn(field="source",
+                title="Source node",
+                editor=TextEditor()),
+    TableColumn(field="target",
+                title="Target node",
+                editor=TextEditor()),
+    TableColumn(field="weight",
+                title="Weight",
+                editor=NumberEditor()),
 ]
 
 edges_data_table_title = Div(

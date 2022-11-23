@@ -34,7 +34,7 @@ import numpy as np
 from numpy import linalg as LA
 
 
-def get_nx_graph(source, target, weight):
+def get_nx_graph(nodes_order_list, source, target, weight):
     """This function provides a networkX represenation of a FCM.
 
     It gets three arguments, i.e. three list of the same length
@@ -53,6 +53,8 @@ def get_nx_graph(source, target, weight):
 
     Parameters
     ----------
+    nodes_order_list : list
+        the nodes of graph.
     source : list
         the source nodes.
     target : list
@@ -72,6 +74,7 @@ def get_nx_graph(source, target, weight):
 
     # creates the netwokX graph:
     nx_graph = nx.DiGraph()
+    nx_graph.add_nodes_from(nodes_order_list)
     nx_graph.add_weighted_edges_from(edges_list)
 
     return nx_graph

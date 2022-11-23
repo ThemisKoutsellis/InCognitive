@@ -3,7 +3,7 @@
 import pandas as pd
 
 from backendcode.xlparse import get_fcm_layout
-from frontendcode.internal_functions import update_graph_renderer
+from frontendcode.internal_functions import _update_graph_renderer
 
 
 all = ('parse_input_xlsx')
@@ -113,6 +113,8 @@ def parse_input_xlsx(
         'desc': fcm_layout_dict['nodes_discription'],
         "type": node_type,
         "initial value": fcm_layout_dict['initial_values'],
+        "auto-weight": fcm_layout_dict['auto_weights'],
+
     }
     source_edges_data = {
         'source': fcm_layout_dict['source_nodes'],
@@ -126,7 +128,7 @@ def parse_input_xlsx(
     (
         graph_renderer,
         labels_renderer
-    ) = update_graph_renderer(fcm_layout_dict)
+    ) = _update_graph_renderer(fcm_layout_dict)
 
     fcm_plot.renderers = []
     fcm_plot.renderers = [graph_renderer, labels_renderer]

@@ -9,6 +9,7 @@ import holoviews as hv
 hv.extension('bokeh')
 
 from bokeh.io import curdoc
+from bokeh.models import Spacer
 from bokeh.models import DataTable
 from bokeh.models import ColumnDataSource
 from bokeh.layouts import layout, column, row
@@ -18,7 +19,7 @@ from bokeh.layouts import layout, column, row
 from frontendcode.widgets import *
 from frontendcode.callbacks import *
 from frontendcode.wpage_layouts import *
-from frontendcode.internal_functions import update_graph_renderer
+from frontendcode.internal_functions import _update_graph_renderer
 
 # ---------------------------------------------------------------------
 # Sessions variables   ------------------------------------------------
@@ -54,6 +55,10 @@ current_doc.nodes_CDS = ColumnDataSource()
 current_doc.edges_CDS = ColumnDataSource()
 
 current_doc.output_nodes_mc_values = {}
+
+# variables to manage the events that happen simultaneously.
+current_doc.dont_update_fcm_layout_dict = False
+current_doc.deleting_rows_from_nodes_DataTable = False
 
 # ---------------------------------------------------------------------
 # Widgets and layouts that depends on doc vars   ----------------------
@@ -97,6 +102,7 @@ datatables_layout = row(
         nodes_data_table,
         node_buttons
     ),
+    Spacer(width=20, height=20),
     column(
         edges_data_table_title,
         edges_data_table,
@@ -113,7 +119,7 @@ fcm_data_manager_layout = column(
 )
 
 fcm_display_layout = layout(
-    row(fcm_plot, fcm_data_manager_layout)
+    row(fcm_plot, Spacer(width=20, height=20), fcm_data_manager_layout)
 )
 
 # Root (web page) layout:
@@ -131,66 +137,66 @@ web_page_layout = column(
 # Attach callbacks on widgets    --------------------------------------
 # ---------------------------------------------------------------------
 
-upload_xlsx_cb = partial(_get_xlsx, doc=current_doc)
+upload_xlsx_cb = partial(get_xlsx, doc=current_doc)
 upload_xlsx_wgt.on_change('value', upload_xlsx_cb)
 
-iter_on_weights_cb = partial(_set_iter_when_weights_vary, doc=current_doc)
+iter_on_weights_cb = partial(set_iter_when_weights_vary, doc=current_doc)
 iter_on_weights_spinner.on_change('value', iter_on_weights_cb)
 
-iter_on_input_nodes_cb = partial(_set_iter_when_inputs_vary, doc=current_doc)
+iter_on_input_nodes_cb = partial(set_iter_when_inputs_vary, doc=current_doc)
 iter_on_input_nodes_spinner.on_change('value', iter_on_input_nodes_cb)
 
-set_lambda_cb = partial(_set_lambda, doc=current_doc)
+set_lambda_cb = partial(set_lambda, doc=current_doc)
 lambda_spinner.on_change('value', set_lambda_cb)
 
-lambda_autoselect_cb = partial(_autoslect_lambda, doc=current_doc)
+lambda_autoselect_cb = partial(autoslect_lambda, doc=current_doc)
 lambda_autoselect_rb.on_click(lambda_autoselect_cb)
 
-variation_on_weights_cb = partial(_variation_on_weights, doc=current_doc)
+variation_on_weights_cb = partial(variation_on_weights, doc=current_doc)
 variable_weights_rb.on_click(variation_on_weights_cb)
 
-variation_on_input_nodes_cb = partial(_variation_on_input_nodes, doc=current_doc)
+variation_on_input_nodes_cb = partial(variation_on_input_nodes, doc=current_doc)
 variable_input_nodes_rb.on_click(variation_on_input_nodes_cb)
 
-set_input_sd_cb = partial(_set_input_sd, doc=current_doc)
+set_input_sd_cb = partial(set_input_sd, doc=current_doc)
 input_nodes_sd_spinner.on_change('value', set_input_sd_cb)
 
-set_trans_func_cb = partial(_set_trans_func, doc=current_doc)
+set_trans_func_cb = partial(set_trans_func, doc=current_doc)
 tr_function_select.on_change("value", set_trans_func_cb)
 
-set_weights_sd_cb = partial(_set_weights_sd, doc=current_doc)
+set_weights_sd_cb = partial(set_weights_sd, doc=current_doc)
 weight_sd_spinner.on_change('value', set_weights_sd_cb)
 
-are_zero_weights_variable_cb = partial(_are_zero_weights_rand_var, doc=current_doc)
+are_zero_weights_variable_cb = partial(are_zero_weights_rand_var, doc=current_doc)
 variable_zero_weights_rb.on_click(are_zero_weights_variable_cb)
 
-clear_allert_msg_div_cb = partial(_clear_allert_msg_div, doc=current_doc)
+clear_allert_msg_div_cb = partial(clear_allert_msg_div, doc=current_doc)
 fcm_plot.on_change('renderers', clear_allert_msg_div_cb)
 
-clear_allert_msg_div_cb = partial(_collect_global_var, doc=current_doc)
+clear_allert_msg_div_cb = partial(collect_global_var, doc=current_doc)
 execute_btn.on_click(clear_allert_msg_div_cb)
 
-clear_allert_msg_div_cb = partial(_collect_global_var, doc=current_doc)
+clear_allert_msg_div_cb = partial(collect_global_var, doc=current_doc)
 execute_btn.on_click(clear_allert_msg_div_cb)
 
-add_edge_cds_row_cb = partial(_add_edge_cds_row, doc=current_doc)
+add_edge_cds_row_cb = partial(add_edge_cds_row, doc=current_doc)
 add_edge_row.on_click(add_edge_cds_row_cb)
 
-del_edges_cb = partial(_del_edges_cds_rows, doc=current_doc)
+del_edges_cb = partial(del_edges_cds_rows, doc=current_doc)
 del_edge_row.on_click(del_edges_cb)
 
-add_node_cds_row_cb = partial(_add_node_cds_row, doc=current_doc)
+add_node_cds_row_cb = partial(add_node_cds_row, doc=current_doc)
 add_node_row.on_click(add_node_cds_row_cb)
 
-del_nodes_cb = partial(_del_nodes_cds_rows, doc=current_doc)
+del_nodes_cb = partial(del_nodes_cds_rows, doc=current_doc)
 del_node_row.on_click(del_nodes_cb)
 
 nodes_CDS_changed_cb = partial(
-    _update_fcm_layout_dict, doc=current_doc, who='nodesCDS')
+    update_fcm_layout_dict, doc=current_doc, who='nodesCDS')
 current_doc.nodes_CDS.on_change('data',nodes_CDS_changed_cb)
 
 edges_CDS_changed_cb = partial(
-    _update_fcm_layout_dict, doc=current_doc, who='edgesCDS')
+    update_fcm_layout_dict, doc=current_doc, who='edgesCDS')
 current_doc.edges_CDS.on_change('data',edges_CDS_changed_cb)
 
 # ---------------------------------------------------------------------
@@ -201,7 +207,7 @@ current_doc.edges_CDS.on_change('data',edges_CDS_changed_cb)
 (
     graph_renderer,
     labels_renderer
-) = update_graph_renderer(
+) = _update_graph_renderer(
     current_doc.fcm_layout_dict
 )
 fcm_plot.renderers = []

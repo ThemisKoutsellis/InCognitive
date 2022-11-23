@@ -65,7 +65,10 @@ simulation_parameters_layout = layout(
 
 results_layout = layout(column(tabs, lambda_div))
 
-fcmmc_layout = row(simulation_parameters_layout, results_layout)
+fcmmc_layout = row(
+    simulation_parameters_layout,
+    spacer,
+    results_layout)
 
 footer_layout = row(acknowledgements, license, github_repo)
 

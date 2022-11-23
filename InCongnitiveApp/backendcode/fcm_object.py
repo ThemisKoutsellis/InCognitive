@@ -16,8 +16,8 @@ of fuzzy cognitive maps', https://doi.org/10.1007/s12351-022-00717-x
 __all__ = ()
 
 from backendcode.activation_function import act_functions
-from backendcode.fcm_layout_parameters import get_nx_graph, get_w_matrix, get_lag_matrix
-
+from backendcode.fcm_layout_parameters import (
+    get_nx_graph, get_w_matrix, get_lag_matrix)
 
 
 import networkx as nx
@@ -156,6 +156,7 @@ class FCMap(object):
             self.activation_function_name
         ]
         self.nx_graph = get_nx_graph(
+            self.source_nodes,
             self.source_nodes,
             self.target_nodes,
             self.weights

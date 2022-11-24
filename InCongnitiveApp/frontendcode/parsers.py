@@ -8,13 +8,12 @@ from frontendcode.internal_functions import _update_graph_renderer
 
 all = ('parse_input_xlsx')
 
-def parse_input_xlsx(
-    file_io,
-    nodes_CDS,
-    edges_CDS,
-    fcm_plot,
-    msg_div
-):
+def parse_input_xlsx(doc, file_io):
+
+    nodes_CDS = doc.nodes_CDS
+    edges_CDS = doc.edges_CDS
+    fcm_plot = fcm_plot = doc.get_model_by_name('fcm_plot')
+    msg_div = doc.get_model_by_name('xlsx_msg_div')
 
     # Exceptions:
     try:
@@ -122,15 +121,7 @@ def parse_input_xlsx(
         'weight': fcm_layout_dict['weights'],
     }
 
+    doc.dont_update_fcm_layout_dict = True
     nodes_CDS.data = source_nodes_data
+    doc.dont_update_fcm_layout_dict = False
     edges_CDS.data = source_edges_data
-
-    (
-        graph_renderer,
-        labels_renderer
-    ) = _update_graph_renderer(fcm_layout_dict)
-
-    fcm_plot.renderers = []
-    fcm_plot.renderers = [graph_renderer, labels_renderer]
-
-    return nodes_CDS, edges_CDS, fcm_layout_dict

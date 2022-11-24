@@ -211,7 +211,6 @@ def _update_graph_renderer(fcm_layout_dict):
         ),
         vdims=hv.Dimension('Weight', range=(-1, 1))
     )
-    print(hv_graph.vdims)
 
    # hvgraph options
     hv_graph.opts(
@@ -365,7 +364,7 @@ def _check_lambdas(doc):
     )
     w_matrix = get_w_matrix(nx_graph, nodes_order, input_nodes, auto_w)
 
-    # If I have FCM-MC is not allowed to have
+    # If we have FCM-MC is not allowed to have
     # lambda greater than the autoselect value
     # FCM-MC case:
     # 1. Input nodes are random variables, weight not.
@@ -377,11 +376,22 @@ def _check_lambdas(doc):
         and (doc.iter_on_input_nodes == doc.iter_on_weights)
     _FCMMC_expr = _expr1 or _expr2 or _expr3
 
+    if _FCMMC_expr:
+        # This variable is needed for the backend code
+        # If False, no normalization procedure. Otherwise,
+        # perform normalization.
+        doc.FCMMC = True
+    else:
+        doc.FCMMC = False
+
     # if we have FCMMC and the autselect_lambda is active
     # (equivalently, doc.lamda==None) there is no need to
-    # chack the lambda parameter for consistency.
+    # check the lambda parameter for consistency.
     if _FCMMC_expr and doc.lamda:
-        max_accepted_lambda, lamda_autoslect = select_lambda(
+        (
+            _max_accepted_lambda,
+            lamda_autoslect
+        ) = select_lambda(
             w_matrix,
             nodes_order,
             input_nodes,
@@ -391,70 +401,125 @@ def _check_lambdas(doc):
             zero_weights_are_rand_var,
             weights_are_rand_var,
         )
-        if max_accepted_lambda < doc.lamda:
-            lambda_is_OK = False
+        if _max_accepted_lambda < doc.lamda:
+            _check__no_valid_lambda = True
         else:
-            lambda_is_OK = True
+            _check__no_valid_lambda = False
     else:
-        lambda_is_OK = True
-        max_accepted_lambda = np.inf
+        _check__no_valid_lambda = False
+        _max_accepted_lambda = np.inf
 
-    return lambda_is_OK, max_accepted_lambda
+    return _check__no_valid_lambda, _max_accepted_lambda
 
 #######################################################################
 def _check_initial_input_node_values(doc):
+    print(doc.fcm_layout_dict)
 
     _initial_values = doc.fcm_layout_dict['initial_values']
-    initial_input_node_values_are_within_accepted_range = False
 
-    try:
-        _initial_values = [float(x) for x in _initial_values]
-    except:
-        initial_input_node_values_are_float = False
-        initial_input_node_values_are_within_accepted_range = False
-        range_str = None
+    if doc.trans_func == 'sigmoid':
+        range_str = '[0,1]'
+    elif doc.trans_func == 'hyperbolic':
+        range_str = '[-1,1]'
+
+    if _initial_values:
+        if 'NaN' in set(_initial_values):
+            _check__no_input_node_values = True
+            _check__no_valid_input_node_values = True
+        else:
+            _check__no_input_node_values = False
+
+            _max_init_v = max(_initial_values)
+            _min_init_v = min(_initial_values)
+            if doc.trans_func == 'sigmoid':
+                if (_min_init_v>=0) and (_max_init_v<=1):
+                    _check__no_valid_input_node_values = False
+                else:
+                    _check__no_valid_input_node_values = True
+            elif doc.trans_func == 'hyperbolic':
+                if (_min_init_v >=- 1) and (_max_init_v <= 1):
+                    _check__no_valid_input_node_values = False
+                else:
+                    _check__no_valid_input_node_values = True
+
     else:
-        initial_input_node_values_are_float = True
+        _check__no_input_node_values = True
+        _check__no_valid_input_node_values = True
 
-        max_init_v = max(_initial_values)
-        min_init_v = min(_initial_values)
-        if doc.trans_func == 'sigmoid':
-            range_str = '[0,1]'
-            if (min_init_v>=0) and (max_init_v<=1):
-                initial_input_node_values_are_within_accepted_range = True
-        elif doc.trans_func == 'hyperbolic':
-            range_str = '[-1,1]'
-            if (min_init_v >=- 1) and (max_init_v <= 1):
-                initial_input_node_values_are_within_accepted_range = True
-
-    return (range_str,
-            initial_input_node_values_are_within_accepted_range,
-            initial_input_node_values_are_float)
+    return (
+        range_str,
+        _check__no_valid_input_node_values,
+        _check__no_input_node_values,
+    )
 
 #######################################################################
-def _check_initial_weight_values(doc):
+def _check_weight_values(doc):
 
-    _initial_weight_values = doc.fcm_layout_dict['weights']
-    initial_weight_values_are_floats = False
+    _weight_values = doc.fcm_layout_dict['weights']
 
-    try:
-        _initial_weight_values = [
-            float(x) for x in _initial_weight_values]
-    except:
-        initial_weight_values_are_floats = False
-        initial_weight_values_are_within_accepted_range = False
-    else:
-        initial_weight_values_are_floats = True
-
-        _max_value = max(_initial_weight_values)
-        _min_value = min(_initial_weight_values)
-        if (_min_value>=-1) and (_max_value<=1):
-            initial_weight_values_are_within_accepted_range = True
+    if _weight_values:
+        if 'NaN' in set(_weight_values):
+            _check__no_weight_values = True
+            _check__no_valid_weight_values = True
         else:
-            initial_weight_values_are_within_accepted_range = True
+            _check__no_weight_values = False
 
-    return (initial_weight_values_are_within_accepted_range,
-            initial_weight_values_are_floats)
+            _max_value = max(_weight_values)
+            _min_value = min(_weight_values)
+            if (_min_value>=-1) and (_max_value<=1):
+                _check__no_valid_weight_values = False
+            else:
+                _check__no_valid_weight_values = True
+    else:
+        _check__no_weight_values = True
+        _check__no_valid_weight_values = True
+
+    return (
+        _check__no_valid_weight_values,
+        _check__no_weight_values
+    )
+
+#######################################################################
+def _check_auto_weight_values(doc):
+
+    _auto_weight_values = doc.fcm_layout_dict['auto_weights']
+
+    if _auto_weight_values:
+        if 'NaN' in set(_auto_weight_values):
+            _check__no_auto_weight_values = True
+            _check__no_valid_auto_weight_values = True
+        else:
+            _check__no_auto_weight_values = False
+
+            _max_value = max(_auto_weight_values)
+            _min_value = min(_auto_weight_values)
+            if (_min_value>=-1) and (_max_value<=1):
+                _check__no_valid_auto_weight_values = False
+            else:
+                _check__no_valid_auto_weight_values = True
+    else:
+        _check__no_auto_weight_values = True
+        _check__no_valid_auto_weight_values = True
+
+    return (
+        _check__no_valid_auto_weight_values,
+        _check__no_auto_weight_values
+    )
+
+#######################################################################
+def _check_for_source_nodes(doc):
+    _dict = doc.fcm_layout_dict
+    _source_nodes = _dict['source_nodes']
+
+    if _source_nodes:
+        if 'NaN' in set(_source_nodes):
+            _check__no_source_nodes = True
+        else:
+            _check__no_source_nodes = True
+    else:
+        _check__no_source_nodes = True
+
+    return _check__no_source_nodes
 
 #######################################################################
 def _check_for_inconsistencies(doc):
@@ -467,70 +532,108 @@ def _check_for_inconsistencies(doc):
     _error_str = ' '
     proceed = False
 
-    # check of input values inconsistencies
-    # -------------------------------------
-    # 1. Estimate the check-expressions
-    error1 = not bool(upload_xlsx_wgt.filename)
-    error2 = not bool(doc.fcm_layout_dict)
-    if not error2:
-        error3 = not bool(doc.fcm_layout_dict['source_nodes'])
-    else:
-        error3 = True
-    there_is_no_input_excel = error1 or error2 or error3
-    _expr2 = doc.iter_on_input_nodes == doc.iter_on_weights
-    _expr3 = (doc.iter_on_input_nodes < 2) or (doc.iter_on_weights < 2)
-    mc_iterations_dont_much = not (_expr2 or _expr3)
-    (
-    initial_weight_values_are_within_accepted_range,
-    initial_weight_values_are_floats,
-    ) = _check_initial_weight_values(doc)
-    (
-    range_str,
-    initial_input_node_values_are_within_accepted_range,
-    initial_input_node_values_are_float,
-    ) = _check_initial_input_node_values(doc)
+    _check__no_fcm_dict_layout = True
+    _check__no_source_nodes = True
+    _check__no_weight_values = True
+    _check__no_valid_weight_values = True
+    _check__no_input_node_values = True
+    _check__no_valid_input_node_values = True
+    _check__no_auto_weight_values = True
+    _check__no_valid_auto_weight_values = True
+    _check__no_valid_mc_iterations = True
 
-    data_tables_are_OK = initial_weight_values_are_within_accepted_range and \
-        initial_weight_values_are_floats and \
-        initial_input_node_values_are_within_accepted_range and \
-        initial_input_node_values_are_float
-    if data_tables_are_OK:
-        lambda_is_OK, max_accepted_lambda = _check_lambdas(doc)
-    else:
-        pass
+    # check for input data inconsistencies
+    # -------------------------------------
+    # 1. Estimate the _check_ Booleans
+    _check__no_fcm_dict_layout = not bool(doc.fcm_layout_dict)
+    if not _check__no_fcm_dict_layout:
+        _check__no_source_nodes = _check_for_source_nodes(doc)
+        (
+            _check__no_valid_weight_values,
+            _check__no_weight_values,
+        ) = _check_weight_values(doc)
+        (
+            range_str,
+            _check__no_valid_input_node_values,
+            _check__no_input_node_values,
+        ) = _check_initial_input_node_values(doc)
+        (
+            _check__no_valid_auto_weight_values,
+            _check__no_auto_weight_values
+        )=_check_auto_weight_values(doc)
+
+        _check__no_matched_iterations = \
+            not (doc.iter_on_input_nodes == doc.iter_on_weights)
+        _check__no_input_nodes_iterations = (doc.iter_on_input_nodes < 2)
+        _check__no_weights_iterations = (doc.iter_on_weights < 2)
+        _check__no_valid_mc_iterations = \
+            (_check__no_matched_iterations) and not \
+            (
+                _check__no_weights_iterations or
+                _check__no_input_nodes_iterations
+            )
+
+    _rest_of_input_data_are_OK = not (
+        _check__no_fcm_dict_layout and \
+        _check__no_source_nodes and \
+        _check__no_weight_values and \
+        _check__no_valid_weight_values and \
+        _check__no_input_node_values and\
+        _check__no_valid_input_node_values and \
+        _check__no_auto_weight_values and \
+        _check__no_valid_auto_weight_values and \
+        _check__no_valid_mc_iterations
+    )
+
+    if _rest_of_input_data_are_OK:
+        (
+            _check__no_valid_lambda,
+            _max_accepted_lambda
+        ) = _check_lambdas(doc)
 
     # 2. Validate inputs
     # If-statements in that order. Do not change!
-    if there_is_no_input_excel:
-        _error_str = ('[ERROR]: There is no input excel'
-                    ' file OR the excel file is erroneous!')
-    elif not initial_weight_values_are_floats:
-        _error_str = ('[ERROR]: Some, or all, of the '
-            'weight values are NaN.')
-    elif not initial_weight_values_are_within_accepted_range:
-        _error_str = ('Some, or all, of the initial weight'
-            ' values are out of range.')
-    elif not initial_input_node_values_are_float:
-        _error_str = (
-            '[ERROR]: Some, or all, of the '
-            'initial input-node-values are NaN.'
-        )
-    elif not initial_input_node_values_are_within_accepted_range:
+    if _check__no_fcm_dict_layout:
+        print('_check__no_fcm_dict_layout')
+        _error_str = '[ERROR]: FCM layout not given!'
+    if _check__no_source_nodes:
+        print('_check__no_source_nodes')
+        _error_str = '[ERROR]: Some source-node values are "NaN"!'
+    elif _check__no_weight_values:
+        print('_check__no_weight_values')
+        _error_str = '[ERROR]:  Some weight values are "NaN"!'
+    elif not _check__no_valid_weight_values:
+        print('_check__no_valid_weight_values')
+        _error_str = '[ERROR]:  Some weight values are out of range!'
+    elif _check__no_input_node_values:
+        print('_check__no_input_node_values')
+        _error_str = '[ERROR]: Some initial input-node values are "NaN"!'
+    elif _check__no_valid_input_node_values:
+        print('_check__no_valid_input_node_values')
         _error_str = ('[ERROR] The transfer function is: {0}. '
-            'Some, or all, of the initial node values are out of'
+            'Some of the initial node values are out of'
             ' range, {1}.'.format(doc.trans_func, range_str)
         )
-    elif mc_iterations_dont_much:
-        _error_str = ('[ERROR]: The number of iterations'
+    elif _check__no_auto_weight_values:
+        print('_check__no_auto_weight_values')
+        _error_str = '[ERROR]:  Some auto-weight values are "NaN"!'
+    elif not _check__no_valid_auto_weight_values:
+        print('_check__no_valid_auto_weight_values')
+        _error_str = '[ERROR]:  Some auto-weight values are out of range!'
+    elif _check__no_valid_mc_iterations:
+        print('_check__no_valid_mc_iterations')
+        _error_str = ('[ERROR]: The number of MC iterations'
                     ' (Weight & Input) must be equal!')
-    elif not lambda_is_OK:
+    elif not _check__no_valid_lambda:
+        print('not _check__no_valid_lambda:')
         _error_str = ('[ERROR] Max-accepted-λ* (={0})'
-            ' is less than the given parameter λ (={1}).\n'
-            '* is the parameter λ which quearntees'
-            ' 100% FCM convergence for all iterations.'.format(
-                max_accepted_lambda, doc.lamda)
+            ' is smaller than the given parameter λ (={1}).\n'
+            '* is the parameter λ which guarantees'
+            ' 100% FCM convergence for all(!) iterations.'.format(
+                _max_accepted_lambda, doc.lamda)
         )
     else:
+        print('Please wait ...')
         _error_str = 'Please wait ...'
         proceed = True
 
@@ -790,7 +893,5 @@ def _update_fcm_dict(doc, _dict):
             ) = _update_graph_renderer(_dict)
             fcm_plot.renderers = []
             fcm_plot.renderers = [graph_renderer, labels_renderer]
-
-        print('_dict = ', _dict)
 
     return _dict

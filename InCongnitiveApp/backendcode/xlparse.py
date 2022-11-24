@@ -120,38 +120,51 @@ def get_fcm_layout(df_nodes_order, df_fcm_topology, df_in_out_nodes):
 
     # Fill the dictionary field values
     fcm_layout_dict["nodes_order"] = list(df_nodes_order['nodes order'])
-    fcm_layout_dict["nodes_order"] = [x for x in fcm_layout_dict["nodes_order"] if pd.isnull(x) == False]
+    fcm_layout_dict["nodes_order"] = [
+        x for x in fcm_layout_dict["nodes_order"] if pd.isnull(x) == False]
 
     fcm_layout_dict["nodes_discription"] = {
-        v:list(df_nodes_order['node description'])[i] for i,v in enumerate(fcm_layout_dict["nodes_order"])
+        v:list(df_nodes_order['node description'])[i] \
+        for i,v in enumerate(fcm_layout_dict["nodes_order"])
     }
-    fcm_layout_dict["nodes_discription"] = [x for x in fcm_layout_dict["nodes_discription"] if pd.isnull(x) == False]
+    fcm_layout_dict["nodes_discription"] = [
+        x for x in fcm_layout_dict["nodes_discription"] if pd.isnull(x) == False]
 
     fcm_layout_dict["auto_weights"] = list(df_nodes_order['auto weights'])
-    fcm_layout_dict["auto_weights"] = [x for x in fcm_layout_dict["auto_weights"] if pd.isnull(x) == False]
+    fcm_layout_dict["auto_weights"] = [
+        x for x in fcm_layout_dict["auto_weights"] if pd.isnull(x) == False]
 
     fcm_layout_dict["auto_lags"] = list(df_nodes_order['auto lags'])
-    fcm_layout_dict["auto_lags"] = [x for x in fcm_layout_dict["auto_lags"] if pd.isnull(x) == False]
+    fcm_layout_dict["auto_lags"] = [
+        x for x in fcm_layout_dict["auto_lags"] if pd.isnull(x) == False]
 
     fcm_layout_dict["initial_values"] = list(df_nodes_order['initial value'])
-    fcm_layout_dict["initial_values"] = [x for x in fcm_layout_dict["initial_values"] if pd.isnull(x) == False]
+    fcm_layout_dict["initial_values"] = [
+        x for x in fcm_layout_dict["initial_values"] if pd.isnull(x) == False]
 
     fcm_layout_dict["input_nodes"] = list(df_in_out_nodes['input nodes'])
-    fcm_layout_dict["input_nodes"] = [x for x in fcm_layout_dict["input_nodes"] if pd.isnull(x) == False]
+    fcm_layout_dict["input_nodes"] = [
+        x for x in fcm_layout_dict["input_nodes"] if pd.isnull(x) == False]
 
-    fcm_layout_dict["output_nodes"] = [x for x in list(df_in_out_nodes['output nodes']) if pd.isnull(x) == False]
-    fcm_layout_dict["output_nodes"] = [x for x in fcm_layout_dict["output_nodes"] if pd.isnull(x) == False]
+    fcm_layout_dict["output_nodes"] = [
+        x for x in list(df_in_out_nodes['output nodes']) if pd.isnull(x) == False]
+    fcm_layout_dict["output_nodes"] = [
+        x for x in fcm_layout_dict["output_nodes"] if pd.isnull(x) == False]
 
     fcm_layout_dict["source_nodes"] = list(df_fcm_topology['source node'])
-    fcm_layout_dict["source_nodes"] = [x for x in fcm_layout_dict["source_nodes"] if pd.isnull(x) == False]
+    fcm_layout_dict["source_nodes"] = [
+        x for x in fcm_layout_dict["source_nodes"] if pd.isnull(x) == False]
 
     fcm_layout_dict["target_nodes"] = list(df_fcm_topology['target node'])
-    fcm_layout_dict["target_nodes"] = [x for x in fcm_layout_dict["target_nodes"] if pd.isnull(x) == False]
+    fcm_layout_dict["target_nodes"] = [
+        x for x in fcm_layout_dict["target_nodes"] if pd.isnull(x) == False]
 
     fcm_layout_dict["weights"] = list(df_fcm_topology['weight'])
-    fcm_layout_dict["weights"] = [x for x in fcm_layout_dict["weights"] if pd.isnull(x) == False]
+    fcm_layout_dict["weights"] = [
+        x for x in fcm_layout_dict["weights"] if pd.isnull(x) == False]
 
     fcm_layout_dict["lags"] = list(df_fcm_topology['lag'])
-    fcm_layout_dict["lags"] = [x for x in fcm_layout_dict["lags"] if pd.isnull(x) == False]
+    fcm_layout_dict["lags"] = [
+        x for x in fcm_layout_dict["lags"] if pd.isnull(x) == False]
 
     return fcm_layout_dict

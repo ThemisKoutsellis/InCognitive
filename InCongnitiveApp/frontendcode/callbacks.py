@@ -46,8 +46,6 @@ def get_xlsx(attr, old, new, doc):
     doc.nodes_CDS.data = {}
     doc.edges_CDS.data = {}
 
-    div = doc.get_model_by_name('xlsx_msg_div')
-    fcm_plot = doc.get_model_by_name('fcm_plot')
     f1 = doc.get_model_by_name('f1')
     f2 = doc.get_model_by_name('f2')
     f3 = doc.get_model_by_name('f3')
@@ -59,16 +57,7 @@ def get_xlsx(attr, old, new, doc):
     raw_data = b64decode(new)
     file_io = io.BytesIO(raw_data)
 
-    (doc.nodes_CDS,
-     doc.edges_CDS,
-     doc.fcm_layout_dict
-    )  = parse_input_xlsx(
-        file_io,
-        doc.nodes_CDS,
-        doc.edges_CDS,
-        fcm_plot,
-        div,
-    )
+    parse_input_xlsx(doc, file_io)
     doc.dont_update_fcm_layout_dict = False
 
 #######################################################################
@@ -191,7 +180,6 @@ def set_trans_func(attr, old, new, doc):
     _display_msg(doc.get_model_by_name('alert_msg_div'))
 
     doc.trans_func = new
-    print(doc.trans_func)
 
 #######################################################################
 def set_input_sd(attr, old, new, doc):
@@ -225,7 +213,7 @@ def clear_allert_msg_div(attr, old, new, doc):
 #######################################################################
 def collect_global_var(doc):
 
-    #print(doc.fcm_layout_dict)
+    print('fcm_layout_dict :\n',doc.fcm_layout_dict)
     f1 = doc.get_model_by_name('f1')
     f2 = doc.get_model_by_name('f2')
     f3 = doc.get_model_by_name('f3')

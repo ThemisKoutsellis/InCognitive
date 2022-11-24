@@ -56,6 +56,10 @@ current_doc.edges_CDS = ColumnDataSource()
 
 current_doc.output_nodes_mc_values = {}
 
+# This variable is needed for the backend code.
+# If False, no normalization procedure. Otherwise,
+# perform normalization.
+current_doc.FCMMC = True
 # variables to manage the events that happen simultaneously.
 current_doc.dont_update_fcm_layout_dict = False
 current_doc.deleting_rows_from_nodes_DataTable = False

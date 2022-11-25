@@ -27,17 +27,14 @@ The 'fcm_mc_execute' class method can handle the following four
 of fuzzy cognitive maps', https://doi.org/10.1007/s12351-022-00717-x
 """
 
-__all__ = ('MCarloFcm', )
-
-
-from re import M
-import pandas as pd
 import numpy as np
 
 from backendcode.fcm_simulator import exec_fcm_simulation
 from backendcode.fcm_layout_parameters import select_lambda
 
+__all__ = ('MCarloFcm', )
 
+#######################################################################
 class MCarloFcm(object):
     """This class is used to combine the FCM simulation [1] and the
     Monte Carlo Simulation (MCS) procedure.
@@ -114,6 +111,7 @@ class MCarloFcm(object):
     """The number of created MCarloFcm instances.
     """
 
+    ###################################################################
     def __new__(cls,*args,**kwargs):
         '''Creates a new FCMap object and checks if there is already
         one in memory. If so, it raises an Exception.'''
@@ -121,12 +119,14 @@ class MCarloFcm(object):
         cls._number_of_fcm_mc += 1
         if cls._number_of_fcm_mc > cls._MAX_FCM_MC:
             # TODO: EXCEPTIONS
-            print("There is already an Fcm Monte Carlo Object. I can't create another one. Sorry!")
+            print("There is already an Fcm Monte Carlo Object.\
+                  I can't create another one. Sorry!")
             cls._number_of_fcm_mc -= 1
             return
         else:
             return super(MCarloFcm, cls).__new__(cls)
 
+    ###################################################################
     # Initialize new object
     def __init__(
         self,
@@ -191,7 +191,8 @@ class MCarloFcm(object):
 
         self.activation_function_name = fcm_obj.activation_function_name
         self.output_nodes_values = {k:[] for k in fcm_obj.output_nodes}
-        self.intermediate_nodes_values = {k:[] for k in fcm_obj.intermediate_nodes}
+        self.intermediate_nodes_values = {
+            k:[] for k in fcm_obj.intermediate_nodes}
         self.input_nodes_values = {k:[] for k in fcm_obj.input_nodes}
 
         if N_WEIGHTS>1:
@@ -215,23 +216,26 @@ class MCarloFcm(object):
                 lamda_autoslect,
             )
 
+    ###################################################################
     def __del__(self):
         '''Deleting the MCarloFcm Object'''
         MCarloFcm._number_of_fcm_mc -= 1
         class_name = self.__class__.__name__
         print(class_name, "destroyed")
 
-
+    ###################################################################
     def _find_a(self, m, sd):
         _a = ((m*(1-m))/((sd)**(2))) -m
 
         return _a
 
+    ###################################################################
     def _find_b(self, m, a):
         _b = ((a/m) - a)
 
         return _b
 
+    ###################################################################
     # Monte Carlo generator when inputs are variables
     def _var_input_mc_gen(self, fcm_object):
         """Case 2 deployment.
@@ -305,12 +309,19 @@ class MCarloFcm(object):
 
             # store the outcome of each iteration:
             for k  in fcm_object.intermediate_nodes:
-                self.intermediate_nodes_values[k].append(normilised_intermediate_final_values[k])
+                self.intermediate_nodes_values[k].append(
+                    normilised_intermediate_final_values[k])
             for k  in fcm_object.output_nodes:
-                self.output_nodes_values[k].append(normilised_output_final_values[k])
+                self.output_nodes_values[k].append(
+                    normilised_output_final_values[k])
 
-            yield  (self.input_nodes_values, self.intermediate_nodes_values, self.output_nodes_values)
+            yield  (
+                self.input_nodes_values,
+                self.intermediate_nodes_values,
+                self.output_nodes_values
+            )
 
+    ###################################################################
     def _sample_w_matrix(self, w_matrix, VARIANCE_ON_ZERO_WEIGHTS):
 
         w_array = np.array(w_matrix)
@@ -352,6 +363,7 @@ class MCarloFcm(object):
 
         return np.matrix(w_array)
 
+    ###################################################################
     # Monte Carlo generator when weights are variant
     def _var_weights_mc_gen(self, fcm_object):
         """Case 3 deployment
@@ -363,12 +375,17 @@ class MCarloFcm(object):
 
             # Initialise Ao
 
-            Ao = fcm_object.set_initial_values(fcm_object.fcm_layout_dict)
-            Arguments = {str(i):[0]  for i in self.fcm_obj.nodes_order}
+            Ao = fcm_object.set_initial_values(
+                fcm_object.fcm_layout_dict)
+            Arguments = {
+                str(i):[0]  for i in self.fcm_obj.nodes_order}
 
             fcm_object.Ao_dict = Ao
 
-            fcm_object.w_matrix = self._sample_w_matrix(_w_matrix, self.VARIANCE_ON_ZERO_WEIGHTS)
+            fcm_object.w_matrix = self._sample_w_matrix(
+                _w_matrix,
+                self.VARIANCE_ON_ZERO_WEIGHTS
+            )
 
             # fcm simulation execution:
             (
@@ -395,19 +412,26 @@ class MCarloFcm(object):
 
             # store the outcome of each iteration:
             for k  in fcm_object.intermediate_nodes:
-                self.intermediate_nodes_values[k].append(normilised_intermediate_final_values[k])
+                self.intermediate_nodes_values[k].append(
+                    normilised_intermediate_final_values[k])
 
             for k  in fcm_object.output_nodes:
-                self.output_nodes_values[k].append(normilised_output_final_values[k])
+                self.output_nodes_values[k].append(
+                    normilised_output_final_values[k])
 
             if fcm_object.input_nodes:
-                _input_values = fcm_object.set_initial_values(fcm_object.fcm_layout_dict)
+                _input_values = fcm_object.set_initial_values(
+                    fcm_object.fcm_layout_dict)
                 for k in self.input_nodes_values.keys():
                     self.input_nodes_values[k] = _input_values[k][0]
 
-            yield  (self.intermediate_nodes_values, self.output_nodes_values)
+            yield  (
+                self.intermediate_nodes_values,
+                self.output_nodes_values
+            )
 
 
+    ###################################################################
     def _var_inputs_n_weights_mc_gen(self, fcm_object):
         """Case 4 deployment
         """
@@ -417,8 +441,10 @@ class MCarloFcm(object):
         for i in range(self.WEIGHTS_ITERATIONS):
 
             # Initialise Ao
-            Ao = fcm_object.set_initial_values(fcm_object.fcm_layout_dict)
-            Arguments = {str(i):[0]  for i in self.fcm_obj.nodes_order}
+            Ao = fcm_object.set_initial_values(
+                fcm_object.fcm_layout_dict)
+            Arguments = {
+                str(i):[0]  for i in self.fcm_obj.nodes_order}
 
 
             # create a sample of input values
@@ -458,7 +484,10 @@ class MCarloFcm(object):
             for k in fcm_object.input_nodes:
                 self.input_nodes_values[k].append(samples_dict[k][-1])
 
-            fcm_object.w_matrix = self._sample_w_matrix(_w_matrix, self.VARIANCE_ON_ZERO_WEIGHTS)
+            fcm_object.w_matrix = self._sample_w_matrix(
+                _w_matrix,
+                self.VARIANCE_ON_ZERO_WEIGHTS
+            )
 
             # fcm simulation execution:
             (
@@ -485,12 +514,19 @@ class MCarloFcm(object):
 
             # store the outcome of each iteration:
             for k  in fcm_object.intermediate_nodes:
-                self.intermediate_nodes_values[k].append(normilised_intermediate_final_values[k])
+                self.intermediate_nodes_values[k].append(
+                    normilised_intermediate_final_values[k])
             for k  in fcm_object.output_nodes:
-                self.output_nodes_values[k].append(normilised_output_final_values[k])
+                self.output_nodes_values[k].append(
+                    normilised_output_final_values[k])
 
-            yield  (self.input_nodes_values, self.intermediate_nodes_values, self.output_nodes_values)
+            yield  (
+                self.input_nodes_values,
+                self.intermediate_nodes_values,
+                self.output_nodes_values
+            )
 
+    ###################################################################
     def fcm_mc_execute(self, fcm_layout_dict):
         """This class method deploys the combination of
         FCM simulation and the Monte Carlo Simulation.
@@ -522,7 +558,6 @@ class MCarloFcm(object):
 
             Ao = fcm_object.set_initial_values(fcm_layout_dict)
             Arguments = {str(i):[0]  for i in fcm_object.nodes_order}
-
             (
                 normilised_output_final_values,
                 normilised_intermediate_final_values,
@@ -547,16 +582,16 @@ class MCarloFcm(object):
 
             if not normilised_intermediate_df.empty:
                 for k in self.intermediate_nodes_values.keys():
-                    self.intermediate_nodes_values[k] = normilised_intermediate_df[k].tail(1).values[0]
-
-            for k in self.output_nodes_values.keys():
-                self.output_nodes_values[k] = normilised_output_df[k].tail(1).values[0]
-
+                    self.intermediate_nodes_values[k] = \
+                        normilised_intermediate_df[k].tail(1).values[0]
+            if not normilised_output_df.empty:
+                for k in self.output_nodes_values.keys():
+                    self.output_nodes_values[k] = \
+                        normilised_output_df[k].tail(1).values[0]
             if fcm_object.input_nodes:
                 input_values = fcm_object.set_initial_values(fcm_layout_dict)
                 for k in self.input_nodes_values.keys():
                     self.input_nodes_values[k] = input_values[k][0]
-
             self.baseline_output_node_values = {}
             self.baseline_intermediate_node_values = {}
             self.baseline_input_node_values = {}
@@ -575,6 +610,7 @@ class MCarloFcm(object):
             self.fcm_obj.Ao_dict = Ao
 
             _original_Ao = fcm_object.set_initial_values(fcm_layout_dict)
+
 
             (
                 baseline_normilised_output_final_values,
@@ -598,8 +634,10 @@ class MCarloFcm(object):
                 fcm_object.ITERATIONS,
             )
 
-            self.baseline_output_node_values = baseline_normilised_output_final_values
-            self.baseline_intermediate_node_values = baseline_normilised_intermediate_final_values
+            self.baseline_output_node_values = \
+                baseline_normilised_output_final_values
+            self.baseline_intermediate_node_values = \
+                baseline_normilised_intermediate_final_values
             self.baseline_input_node_values = _original_Ao
 
         # CASE 3 : Variable weights - Constant inputs
@@ -641,8 +679,10 @@ class MCarloFcm(object):
                 fcm_object.ITERATIONS,
             )
 
-            self.baseline_output_node_values = baseline_normilised_output_final_values
-            self.baseline_intermediate_node_values = baseline_normilised_intermediate_final_values
+            self.baseline_output_node_values = \
+                baseline_normilised_output_final_values
+            self.baseline_intermediate_node_values = \
+                baseline_normilised_intermediate_final_values
             self.baseline_input_node_values = _original_Ao
 
         # CASE 4 : Variable weights - Variable inputs
@@ -684,8 +724,10 @@ class MCarloFcm(object):
                 fcm_object.ITERATIONS,
             )
 
-            self.baseline_output_node_values = baseline_normilised_output_final_values
-            self.baseline_intermediate_node_values = baseline_normilised_intermediate_final_values
+            self.baseline_output_node_values = \
+                baseline_normilised_output_final_values
+            self.baseline_intermediate_node_values = \
+                baseline_normilised_intermediate_final_values
             self.baseline_input_node_values = _original_Ao
 
         return

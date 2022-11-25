@@ -12,17 +12,15 @@ of fuzzy cognitive maps', https://doi.org/10.1007/s12351-022-00717-x
 
 """
 
-
-__all__ = ()
+import networkx as nx
 
 from backendcode.activation_function import act_functions
 from backendcode.fcm_layout_parameters import (
     get_nx_graph, get_w_matrix, get_lag_matrix)
 
+__all__ = ('FCMap')
 
-import networkx as nx
-
-
+#######################################################################
 class FCMap(object):
     """A class representing the Fazzy Cognitive Map.
 
@@ -133,18 +131,10 @@ class FCMap(object):
         self.nodes_discription = fcm_layout_dict['nodes_discription']
         self.input_nodes = fcm_layout_dict['input_nodes']
         self.output_nodes = fcm_layout_dict['output_nodes']
-        if self.input_nodes and self.output_nodes:
-            self.intermediate_nodes = \
-                [i for i in self.nodes_order \
-                    if i not in self.input_nodes + self.output_nodes
-                ]
-        elif self.output_nodes:
-            self.intermediate_nodes = \
-                [i for i in self.nodes_order \
-                   if i not in self.output_nodes
-                ]
-        else:
-            self.intermediate_nodes = [i for i in self.nodes_order]
+        self.intermediate_nodes = [
+            x for x in self.nodes_order \
+            if (x not in self.input_nodes) and (x not in self.output_nodes)
+        ]
         self.source_nodes = fcm_layout_dict['source_nodes']
         self.target_nodes = fcm_layout_dict['target_nodes']
         self.weights = fcm_layout_dict['weights']
@@ -176,7 +166,7 @@ class FCMap(object):
         )
 
         # find the minimum number of required iterations
-        if self.input_nodes:
+        if self.input_nodes and self.output_nodes:
             paths = []
             for in_node in self.input_nodes:
                 for out_node in self.output_nodes:
@@ -220,7 +210,7 @@ class FCMap(object):
         Returns
         -------
         dict
-            the key are the names of nodes and the corresponding value
+            the keys are the names of nodes and the corresponding value
             the initial values of Eq. (2) in [1].
 
         * [1] 'Parameter analysis for sigmoid and hyperbolic

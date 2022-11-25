@@ -7,8 +7,6 @@ from base64 import b64decode
 from functools import partial
 from time import sleep
 
-from bokeh.models import ColumnDataSource
-
 # import internal modules
 from frontendcode.parsers import parse_input_xlsx
 from frontendcode.internal_functions import (
@@ -213,7 +211,6 @@ def clear_allert_msg_div(attr, old, new, doc):
 #######################################################################
 def collect_global_var(doc):
 
-    print('fcm_layout_dict :\n',doc.fcm_layout_dict)
     f1 = doc.get_model_by_name('f1')
     f2 = doc.get_model_by_name('f2')
     f3 = doc.get_model_by_name('f3')

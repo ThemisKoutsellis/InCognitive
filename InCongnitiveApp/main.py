@@ -4,7 +4,6 @@ import os
 from functools import partial
 
 # bokeh & holoviews imports
-from holoviews import opts
 import holoviews as hv
 hv.extension('bokeh')
 
@@ -22,7 +21,7 @@ from frontendcode.wpage_layouts import *
 from frontendcode.internal_functions import _update_graph_renderer
 
 # ---------------------------------------------------------------------
-# Sessions variables   ------------------------------------------------
+# Session's variables   ------------------------------------------------
 # ---------------------------------------------------------------------
 
 # Assign the seesion vars to the current Doc
@@ -36,6 +35,10 @@ current_doc.fcm_layout_dict = {
     'input_nodes': [],
     'output_nodes': [],
     'nodes_discription': [],
+    'auto_weights': [],
+    'auto_lags': [],
+    'initial_values': [],
+    'lags': [],
 }
 
 current_doc.trans_func = 'sigmoid'
@@ -176,9 +179,6 @@ variable_zero_weights_rb.on_click(are_zero_weights_variable_cb)
 
 clear_allert_msg_div_cb = partial(clear_allert_msg_div, doc=current_doc)
 fcm_plot.on_change('renderers', clear_allert_msg_div_cb)
-
-clear_allert_msg_div_cb = partial(collect_global_var, doc=current_doc)
-execute_btn.on_click(clear_allert_msg_div_cb)
 
 clear_allert_msg_div_cb = partial(collect_global_var, doc=current_doc)
 execute_btn.on_click(clear_allert_msg_div_cb)

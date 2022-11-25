@@ -23,11 +23,11 @@ of fuzzy cognitive maps', https://doi.org/10.1007/s12351-022-00717-x
 
 """
 
-__all__ = ('exec_fcm_simulation')
-
-
 import pandas as pd
 
+__all__ = ('exec_fcm_simulation')
+
+#######################################################################
 def _fcm_generator(
     A,
     Arguments,
@@ -45,11 +45,6 @@ def _fcm_generator(
     j = 0
     _error = 10
     _error_threshold = 0.0001
-
-    if input_nodes:
-        change_input_nodes = False
-    else:
-        change_input_nodes = True
 
     while (j<=MIN_NUM_OF_ITERATIONS+1) or ((_error>=_error_threshold) and (j<_ITERATIONS)):
 
@@ -73,15 +68,7 @@ def _fcm_generator(
             A_prev_with_lags = {k:v[-_lag[k]] for k, v in A.items()}
 
             # Calculate A_next:
-            if change_input_nodes:
-                _index = nodes_order.index(key)
-                _row_i =w_matrix[_index, :].tolist()[0]
-                _w = {v: float(_row_i[i]) for i, v in enumerate(nodes_order)}
-
-                _argument = sum([_w[k]*v for k, v in A_prev_with_lags.items()])
-                A_next[key] = F(lamda, _argument)
-                _Arguments[key] = _argument
-            else:
+            if input_nodes:
                 if key in input_nodes:
                     A_next[key] = A_prev_with_lags[key]
                 else:
@@ -92,6 +79,13 @@ def _fcm_generator(
                     _argument = sum([_w[k]*v for k, v in A_prev_with_lags.items()])
                     A_next[key] = F(lamda, _argument)
                     _Arguments[key] = _argument
+            else:
+                _index = nodes_order.index(key)
+                _row_i =w_matrix[_index, :].tolist()[0]
+                _w = {v: float(_row_i[i]) for i, v in enumerate(nodes_order)}
+                _argument = sum([_w[k]*v for k, v in A_prev_with_lags.items()])
+                A_next[key] = F(lamda, _argument)
+                _Arguments[key] = _argument
 
         # Append A_next to A:
         [A[key].append(A_next[key]) for key in A.keys()]
@@ -100,14 +94,14 @@ def _fcm_generator(
         [Arguments[key].append(_Arguments[key]) for key in A.keys()]
 
         # Estimate the error between A_next, A_prev_with_lags:
-
-        _error = max([abs(A[key][-1] - A[key][-2]) for key in output_nodes])
+        no_input_nodes = [x for x in nodes_order if x not in input_nodes]
+        _error = max([abs(A[key][-1] - A[key][-2]) for key in no_input_nodes])
         # next j-th iteration:
         j+=1
         # yielded value:
         yield A
 
-
+#######################################################################
 def _normalise_outcomes(
     intermediate_df,
     output_df,
@@ -119,7 +113,7 @@ def _normalise_outcomes(
 
     if activation_function_name=='sigmoid':
         # Intermediate nodes
-        if len(intermediate_df):
+        if not intermediate_df.empty:
             _last_row = intermediate_df.tail(1).values[0]
             _norm_last_row = [
                 v  +((0.09*lamda)*intermediate_x_f[i])
@@ -131,59 +125,36 @@ def _normalise_outcomes(
             normilised_intermediate_df = pd.DataFrame()
 
         # Output nodes
-        _last_row = output_df.tail(1).values[0]
-        _norm_last_row = [
-            v  +((0.09*lamda)*output_x_f[i])
-            for i,v in enumerate(_last_row)
-        ]
-        normilised_output_df = output_df
-        normilised_output_df.iloc[-1,:] = _norm_last_row
-
+        if not output_df.empty:
+            _last_row = output_df.tail(1).values[0]
+            _norm_last_row = [
+                v  +((0.09*lamda)*output_x_f[i])
+                for i,v in enumerate(_last_row)
+            ]
+            normilised_output_df = output_df
+            normilised_output_df.iloc[-1,:] = _norm_last_row
+        else:
+            normilised_output_df = pd.DataFrame()
     elif activation_function_name=='hyperbolic':
         # Intermediate nodes
-        if len(intermediate_df):
+        if not intermediate_df.empty:
             normilised_intermediate_df = intermediate_df*1.733
         else:
             normilised_intermediate_df = pd.DataFrame()
         # Output nodes
-        normilised_output_df = output_df*1.733
+        if not output_df.empty:
+            normilised_output_df = output_df*1.733
+        else:
+            normilised_output_df = pd.DataFrame()
 
     return normilised_intermediate_df, normilised_output_df
 
-
-#############################################
+#######################################################################
 def _create_outcomes_dframes(nodes_order, input_nodes, output_nodes, A):
 
-    # get intermediate nodes dict:
-    if input_nodes:
-        _input_nodes_index = [nodes_order.index(i) for i in input_nodes]
-    else:
-        _input_nodes_index = None
-    if output_nodes:
-        _output_nodes_index = [nodes_order.index(i) for i in output_nodes]
-    else:
-        _output_nodes_index = None
-    if _input_nodes_index and _output_nodes_index:
-        _not_intermediate_index = _input_nodes_index + _output_nodes_index
-        _intermediate_nodes_index = [
-            i for i in range(0,len(nodes_order))
-            if i not in _not_intermediate_index
-        ]
-        intermediate_nodes = [
-            nodes_order[i]
-            for i in _intermediate_nodes_index
-        ]
-    elif _output_nodes_index:
-        _not_intermediate_index = _output_nodes_index
-        _intermediate_nodes_index = [
-            i for i in range(0,len(nodes_order))
-            if i not in _not_intermediate_index
-        ]
-        intermediate_nodes = [
-            nodes_order[i] for i in _intermediate_nodes_index
-        ]
-    else:
-        intermediate_nodes = nodes_order
+    intermediate_nodes = \
+        [x for x in nodes_order \
+         if (x not in input_nodes) and (x not in output_nodes) ]
 
     if input_nodes:
         input_data_dict = {i:A[i] for i in input_nodes}
@@ -195,7 +166,10 @@ def _create_outcomes_dframes(nodes_order, input_nodes, output_nodes, A):
     else:
         output_data_dict = {}
 
-    intermediate_data_dict = {i:A[i] for i in intermediate_nodes}
+    if intermediate_nodes:
+        intermediate_data_dict = {i:A[i] for i in intermediate_nodes}
+    else:
+        intermediate_data_dict = {}
 
     # Data frames:
     input_df = pd.DataFrame.from_dict(input_data_dict)
@@ -204,8 +178,7 @@ def _create_outcomes_dframes(nodes_order, input_nodes, output_nodes, A):
 
     return input_df, intermediate_df, output_df
 
-########################################################
-
+#######################################################################
 def exec_fcm_simulation(
     A,
     Arguments,
@@ -323,7 +296,6 @@ def exec_fcm_simulation(
     # last itaration for the output nodes
     output_x_f = [x_f[i] for i,v in enumerate(nodes_order)\
         if (v in output_nodes) ]
-
     # create the outcome data frames
     (
     input_df,
@@ -335,7 +307,6 @@ def exec_fcm_simulation(
         output_nodes,
         A,
     )
-
     # normalise the outcome dataframes:
     (normilised_intermediate_df,
     normilised_output_df
@@ -347,23 +318,19 @@ def exec_fcm_simulation(
         intermediate_x_f,
         output_x_f,
     )
-
     # derive the final values
     final_A_values= {}
     for key, value in A.items():
         final_A_values[key] = value[-1]
-
     if not normilised_intermediate_df.empty:
         norm_inter_final_values_list = \
             list(normilised_intermediate_df.iloc[-1])
     else:
         norm_inter_final_values_list = []
-
     if not normilised_output_df.empty:
         norm_output_final_values_list = list(normilised_output_df.iloc[-1])
     else:
         norm_output_final_values_list = []
-
     normilised_intermediate_final_values = \
         {intermediate_nodes[count]:ele \
             for count, ele in enumerate(norm_inter_final_values_list)
@@ -372,7 +339,6 @@ def exec_fcm_simulation(
         {output_nodes[count]:ele \
             for count, ele in enumerate(norm_output_final_values_list)
         }
-
 
     return (
         normilised_output_final_values,

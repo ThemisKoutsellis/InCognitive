@@ -9,13 +9,13 @@ of fuzzy cognitive maps', https://doi.org/10.1007/s12351-022-00717-x
 
 """
 
-__all__ = ('monte_carlo_simulation')
-
 import numpy as np
 from backendcode.fcm_object import FCMap
 from backendcode.fcmmc_object import MCarloFcm
 
+__all__ = ('monte_carlo_simulation')
 
+#######################################################################
 def monte_carlo_simulation(
     fcm_layout_dict,
     inputs_iterations,
@@ -102,16 +102,27 @@ def monte_carlo_simulation(
     """
 
     # check if WEIGHTS_ITERATIONS and INPUTS_ITERATIONS constants match
+    _weights_iterations_warning = (
+        '\nFcm obj destroyed. '
+        'Weights iterations is {}'.format(weights_iterations)
+    )
     if weights_iterations<1:
-        raise Exception("\nFcm obj destroyed. Weights iterations is {}".format(weights_iterations))
+        raise Exception(_weights_iterations_warning)
 
+    _inputs_iterations_warning = (
+        '\nFcm obj destroyed. '
+        'Inputs iterations is {}'.format(inputs_iterations)
+    )
     if inputs_iterations<1:
-        raise Exception("\nFcm obj destroyed. Inputs iterations is {}".format(inputs_iterations))
+        raise Exception(_inputs_iterations_warning)
 
+    _iteration_dont_match_warning = (
+        '\nFcm obj destroyed. '
+        'Provided iterations (inputs, weights) do not match!'
+    )
     if (weights_iterations>1 and  inputs_iterations>1) and\
         (not(weights_iterations == inputs_iterations)):
-
-        raise Exception("\nFcm obj destroyed. Provided iterations (inputs, weights) do not match!")
+        raise Exception(_iteration_dont_match_warning)
 
 
     fcm = FCMap(fcm_layout_dict, transfer_func)

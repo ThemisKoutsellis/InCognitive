@@ -1,4 +1,5 @@
 # internal_functions.py
+
 import bisect
 import operator
 import pandas as pd
@@ -6,7 +7,6 @@ import numpy as np
 
 import networkx as nx
 from functools import partial
-import matplotlib as mplt
 import matplotlib.pyplot as plt
 from scipy.stats.kde import gaussian_kde
 
@@ -256,7 +256,6 @@ def _excecute_fcmmc(doc):
 
     # Execute FCM-MC Sim after passing the test of values inconsistency
     ###################################################################
-
     # Monte Carlo Simulation
     (
     mc_lambda,
@@ -277,7 +276,6 @@ def _excecute_fcmmc(doc):
         doc.lamda,
         doc.autoslect_lambda,
     )
-
     # Display results
     # -----------------------------------------------------------------
     f1 = doc.get_model_by_name('f1')
@@ -339,8 +337,8 @@ def _display_last_exec_msg(doc, _error_str, _lambda_div_str):
     lambda_div = doc.get_model_by_name('lambda_div')
     alert_msg_div = doc.get_model_by_name('alert_msg_div')
 
-    _display_msg(alert_msg_div, msg=_error_str, msg_type='alert')
-    _display_msg(lambda_div, msg=_error_str, msg_type='alert')
+    #_display_msg(alert_msg_div, msg=_error_str, msg_type='alert')
+    #_display_msg(lambda_div, msg=_error_str, msg_type='alert')
     return
 
 #######################################################################
@@ -413,7 +411,6 @@ def _check_lambdas(doc):
 
 #######################################################################
 def _check_initial_input_node_values(doc):
-    print(doc.fcm_layout_dict)
 
     _initial_values = doc.fcm_layout_dict['initial_values']
 
@@ -423,33 +420,33 @@ def _check_initial_input_node_values(doc):
         range_str = '[-1,1]'
 
     if _initial_values:
-        if 'NaN' in set(_initial_values):
-            _check__no_input_node_values = True
-            _check__no_valid_input_node_values = True
+        if np.isnan(_initial_values).any():
+            _check__no_initial_node_values = True
+            _check__no_valid_initial_node_values = True
         else:
-            _check__no_input_node_values = False
+            _check__no_initial_node_values = False
 
             _max_init_v = max(_initial_values)
             _min_init_v = min(_initial_values)
             if doc.trans_func == 'sigmoid':
                 if (_min_init_v>=0) and (_max_init_v<=1):
-                    _check__no_valid_input_node_values = False
+                    _check__no_valid_initial_node_values = False
                 else:
-                    _check__no_valid_input_node_values = True
+                    _check__no_valid_initial_node_values = True
             elif doc.trans_func == 'hyperbolic':
                 if (_min_init_v >=- 1) and (_max_init_v <= 1):
-                    _check__no_valid_input_node_values = False
+                    _check__no_valid_initial_node_values = False
                 else:
-                    _check__no_valid_input_node_values = True
+                    _check__no_valid_initial_node_values = True
 
     else:
-        _check__no_input_node_values = True
-        _check__no_valid_input_node_values = True
+        _check__no_initial_node_values = True
+        _check__no_valid_initial_node_values = True
 
     return (
         range_str,
-        _check__no_valid_input_node_values,
-        _check__no_input_node_values,
+        _check__no_valid_initial_node_values,
+        _check__no_initial_node_values,
     )
 
 #######################################################################
@@ -458,7 +455,7 @@ def _check_weight_values(doc):
     _weight_values = doc.fcm_layout_dict['weights']
 
     if _weight_values:
-        if 'NaN' in set(_weight_values):
+        if np.isnan(_weight_values).any():
             _check__no_weight_values = True
             _check__no_valid_weight_values = True
         else:
@@ -485,7 +482,7 @@ def _check_auto_weight_values(doc):
     _auto_weight_values = doc.fcm_layout_dict['auto_weights']
 
     if _auto_weight_values:
-        if 'NaN' in set(_auto_weight_values):
+        if np.isnan(_auto_weight_values).any():
             _check__no_auto_weight_values = True
             _check__no_valid_auto_weight_values = True
         else:
@@ -515,7 +512,7 @@ def _check_for_source_nodes(doc):
         if 'NaN' in set(_source_nodes):
             _check__no_source_nodes = True
         else:
-            _check__no_source_nodes = True
+            _check__no_source_nodes = False
     else:
         _check__no_source_nodes = True
 
@@ -536,8 +533,8 @@ def _check_for_inconsistencies(doc):
     _check__no_source_nodes = True
     _check__no_weight_values = True
     _check__no_valid_weight_values = True
-    _check__no_input_node_values = True
-    _check__no_valid_input_node_values = True
+    _check__no_initial_node_values = True
+    _check__no_valid_initial_node_values = True
     _check__no_auto_weight_values = True
     _check__no_valid_auto_weight_values = True
     _check__no_valid_mc_iterations = True
@@ -554,8 +551,8 @@ def _check_for_inconsistencies(doc):
         ) = _check_weight_values(doc)
         (
             range_str,
-            _check__no_valid_input_node_values,
-            _check__no_input_node_values,
+            _check__no_valid_initial_node_values,
+            _check__no_initial_node_values,
         ) = _check_initial_input_node_values(doc)
         (
             _check__no_valid_auto_weight_values,
@@ -572,16 +569,15 @@ def _check_for_inconsistencies(doc):
                 _check__no_weights_iterations or
                 _check__no_input_nodes_iterations
             )
-
     _rest_of_input_data_are_OK = not (
-        _check__no_fcm_dict_layout and \
-        _check__no_source_nodes and \
-        _check__no_weight_values and \
-        _check__no_valid_weight_values and \
-        _check__no_input_node_values and\
-        _check__no_valid_input_node_values and \
-        _check__no_auto_weight_values and \
-        _check__no_valid_auto_weight_values and \
+        _check__no_fcm_dict_layout or \
+        _check__no_source_nodes or \
+        _check__no_weight_values or \
+        _check__no_valid_weight_values or \
+        _check__no_initial_node_values or\
+        _check__no_valid_initial_node_values or \
+        _check__no_auto_weight_values or \
+        _check__no_valid_auto_weight_values or \
         _check__no_valid_mc_iterations
     )
 
@@ -593,39 +589,30 @@ def _check_for_inconsistencies(doc):
 
     # 2. Validate inputs
     # If-statements in that order. Do not change!
+    proceed = False
     if _check__no_fcm_dict_layout:
-        print('_check__no_fcm_dict_layout')
         _error_str = '[ERROR]: FCM layout not given!'
-    if _check__no_source_nodes:
-        print('_check__no_source_nodes')
+    elif _check__no_source_nodes:
         _error_str = '[ERROR]: Some source-node values are "NaN"!'
     elif _check__no_weight_values:
-        print('_check__no_weight_values')
         _error_str = '[ERROR]:  Some weight values are "NaN"!'
-    elif not _check__no_valid_weight_values:
-        print('_check__no_valid_weight_values')
+    elif _check__no_valid_weight_values:
         _error_str = '[ERROR]:  Some weight values are out of range!'
-    elif _check__no_input_node_values:
-        print('_check__no_input_node_values')
-        _error_str = '[ERROR]: Some initial input-node values are "NaN"!'
-    elif _check__no_valid_input_node_values:
-        print('_check__no_valid_input_node_values')
+    elif _check__no_initial_node_values:
+        _error_str = '[ERROR]: Some initial node values are "NaN"!'
+    elif _check__no_valid_initial_node_values:
         _error_str = ('[ERROR] The transfer function is: {0}. '
             'Some of the initial node values are out of'
             ' range, {1}.'.format(doc.trans_func, range_str)
         )
     elif _check__no_auto_weight_values:
-        print('_check__no_auto_weight_values')
         _error_str = '[ERROR]:  Some auto-weight values are "NaN"!'
-    elif not _check__no_valid_auto_weight_values:
-        print('_check__no_valid_auto_weight_values')
+    elif _check__no_valid_auto_weight_values:
         _error_str = '[ERROR]:  Some auto-weight values are out of range!'
     elif _check__no_valid_mc_iterations:
-        print('_check__no_valid_mc_iterations')
         _error_str = ('[ERROR]: The number of MC iterations'
                     ' (Weight & Input) must be equal!')
-    elif not _check__no_valid_lambda:
-        print('not _check__no_valid_lambda:')
+    elif _check__no_valid_lambda:
         _error_str = ('[ERROR] Max-accepted-λ* (={0})'
             ' is smaller than the given parameter λ (={1}).\n'
             '* is the parameter λ which guarantees'
@@ -633,17 +620,21 @@ def _check_for_inconsistencies(doc):
                 _max_accepted_lambda, doc.lamda)
         )
     else:
-        print('Please wait ...')
         _error_str = 'Please wait ...'
         proceed = True
 
-    _display_msg(lambda_div, msg=_error_str, msg_type='alert')
+    print('_error_str= ', _error_str)
+    #_display_msg(lambda_div, msg=_error_str, msg_type='alert')
 
     # call the FCM-MC function on next tick
     if proceed:
+        print('PROCEED')
+        _display_msg(lambda_div, msg=_error_str, msg_type='alert')
         fcmmc_cb = partial(_excecute_fcmmc, doc)
         doc.add_next_tick_callback(fcmmc_cb)
     else:
+        print('DONT PROCEED')
+        _display_msg(lambda_div, msg=_error_str, msg_type='alert')
         display_last_exec_msg_cb = partial(
             _display_last_exec_msg, doc, _error_str, _error_str)
         doc.add_next_tick_callback(display_last_exec_msg_cb)

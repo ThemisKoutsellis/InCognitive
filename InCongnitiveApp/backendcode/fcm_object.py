@@ -185,7 +185,7 @@ class FCMap(object):
                             '--> [output node ({})] .*'
                             .format(in_node, out_node)
                         )
-                        print(warning_str)
+                        #print(warning_str)
                     else:
                         len_of_min_path = len(
                             nx.shortest_path(
@@ -205,7 +205,7 @@ class FCMap(object):
 
         FCMap._number_of_maps -= 1
         class_name = self.__class__.__name__
-        print(class_name, "destroyed")
+        #print(class_name, "destroyed")
 
     def set_initial_values(self, fcm_layout_dict):
         """This method initializes the node's state vector.

@@ -14,7 +14,6 @@ __all__ = (
     'license',
     'github_repo',
     'separator',
-    'alert_msg_div',
     'excel_parse_msg_div',
     'upload_xlsx_wgt',
     'nodes_columns',
@@ -40,7 +39,7 @@ __all__ = (
     'f2',
     'f3',
     'tabs',
-    'lambda_div',
+    'msg_div',
     'save_bn',
     'add_edge_row',
     'del_edge_row',
@@ -104,9 +103,6 @@ github_repo = Div(
 def separator(width=550, height=5):
     return Div(text=f'<hr width="{width}">',
                width=width, height=height)
-
-# Simulation message Div:
-alert_msg_div = Div(text='', width=300, name='alert_msg_div')
 
 # Interconnection table message Div:
 excel_parse_msg_div = Div(text='', width=300, name='xlsx_msg_div')
@@ -181,7 +177,6 @@ del_edge_row = Button(
     label="Delete selected row(s)",
     button_type="success", width=80,
 )
-
 
 #######################################################################
 # FCM topology figure:
@@ -366,7 +361,7 @@ _tab3 = Panel(child=f3, title="Output nodes")
 
 tabs = Tabs(tabs=[_tab1, _tab2, _tab3])
 
-lambda_div = Div(name='lambda_div')
+msg_div = Div(name='msg_div')
 
 save_bn = Button(
     label="Save layout to xlsx format",

@@ -3,12 +3,11 @@
 """This module provides the transfer functions of FCMs.
 
 It returns a dictionary, 'act_functions', with memory
-referneces of the impliment tranfer functions.
+referneces of the deployed tranfer functions.
 
-Current implimented tranfer function are:
+The deployed tranfer function are:
     1. Sigmoid,
     2. Hyperbolic tangent.
-
 """
 
 __all__ = ('act_functions')

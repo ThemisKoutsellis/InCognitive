@@ -10,7 +10,6 @@ from time import sleep
 # import internal modules
 from frontendcode.parsers import parse_input_xlsx
 from frontendcode.internal_functions import (
-    _display_msg,
     _check_for_inconsistencies,
     _update_fcm_dict,
 )
@@ -52,16 +51,20 @@ def get_xlsx(attr, old, new, doc):
     f2.renderers = []
     f3.renderers = []
 
+    f1.y_range.factors = []
+    f2.y_range.factors = []
+    f3.y_range.factors = []
+
     raw_data = b64decode(new)
     file_io = io.BytesIO(raw_data)
 
     parse_input_xlsx(doc, file_io)
     doc.dont_update_fcm_layout_dict = False
 
+    return
+
 #######################################################################
 def set_iter_when_weights_vary(attr, old, new, doc):
-
-    _display_msg(doc.get_model_by_name('alert_msg_div'))
     doc.iter_on_weights = new
 
     _zero_w_rb = doc.get_model_by_name('variable_zero_weights_rb')
@@ -77,10 +80,9 @@ def set_iter_when_weights_vary(attr, old, new, doc):
         _zero_w_rb.disabled = False
         _w_sd_spinner.disabled = False
 
+    return
 #######################################################################
 def set_iter_when_inputs_vary(attr, old, new, doc):
-    _display_msg(doc.get_model_by_name('alert_msg_div'))
-
     _in_sd_spinner = doc.get_model_by_name('input_nodes_sd_spinner')
 
     doc.iter_on_input_nodes = new
@@ -91,16 +93,14 @@ def set_iter_when_inputs_vary(attr, old, new, doc):
     else:
         _in_sd_spinner.disabled = False
 
+    return
 #######################################################################
 def set_lambda(attr, old, new, doc):
-    _display_msg(doc.get_model_by_name('alert_msg_div'))
-
     doc.lamda = new
 
+    return
 #######################################################################
 def autoslect_lambda(active, doc):
-    _display_msg(doc.get_model_by_name('alert_msg_div'))
-
     _lambda_spinner = doc.get_model_by_name('lambda_spinner')
 
     if active:
@@ -113,10 +113,9 @@ def autoslect_lambda(active, doc):
         _lambda_spinner.value = 0.5
         doc.lamda = 0.5
 
+    return
 #######################################################################
 def variation_on_weights(active, doc):
-    _display_msg(doc.get_model_by_name('alert_msg_div'))
-
     _itr_w_spinner = doc.get_model_by_name('iter_on_weights_spinner')
     _w_sd_spinner = doc.get_model_by_name('weight_sd_spinner')
     _var_zero_w_rb= doc.get_model_by_name('variable_zero_weights_rb')
@@ -148,10 +147,9 @@ def variation_on_weights(active, doc):
         _var_zero_w_rb.disabled = True
         doc.zero_weights_are_rand_var = False
 
+    return
 #######################################################################
 def variation_on_input_nodes(active, doc):
-    _display_msg(doc.get_model_by_name('alert_msg_div'))
-
     _itr_spinner = doc.get_model_by_name('iter_on_input_nodes_spinner')
     _in_sd_spinner = doc.get_model_by_name('input_nodes_sd_spinner')
 
@@ -173,41 +171,38 @@ def variation_on_input_nodes(active, doc):
         _itr_spinner.disabled = True
         doc.sd_inputs = 0
 
+    return
 #######################################################################
 def set_trans_func(attr, old, new, doc):
-    _display_msg(doc.get_model_by_name('alert_msg_div'))
-
     doc.trans_func = new
 
+    return
 #######################################################################
 def set_input_sd(attr, old, new, doc):
-    _display_msg(doc.get_model_by_name('alert_msg_div'))
-
     doc.input_nodes_sd = new
 
+    return
 #######################################################################
 def set_weights_sd(attr, old, new, doc):
-    _display_msg(doc.get_model_by_name('alert_msg_div'))
-
     doc.weights_sd = new
 
+    return
 #######################################################################
 def are_zero_weights_rand_var(active, doc):
-    _display_msg(doc.get_model_by_name('alert_msg_div'))
-
     if active:
         doc.zero_weights_are_rand_var = True
     else:
         doc.zero_weights_are_rand_var = False
 
+    return
 #######################################################################
 def clear_allert_msg_div(attr, old, new, doc):
-    lambda_div = doc.get_model_by_name('lambda_div')
-    alert_msg_div = doc.get_model_by_name('alert_msg_div')
-    if lambda_div and alert_msg_div:
-        _display_msg(alert_msg_div)
-        _display_msg(lambda_div)
+    msg_div = doc.get_model_by_name('msg_div')
+    if msg_div:
+        msg_div.text = ' '
+        msg_div.style= {'font-size': '100%', 'color': 'green'}
 
+    return
 #######################################################################
 def collect_global_var(doc):
 
@@ -220,15 +215,18 @@ def collect_global_var(doc):
     f2.renderers = []
     f3.renderers = []
 
-    lambda_div = doc.get_model_by_name('lambda_div')
-    alert_msg_div = doc.get_model_by_name('alert_msg_div')
-    _display_msg(lambda_div)
-    _display_msg(alert_msg_div)
+    f1.y_range.factors = []
+    f2.y_range.factors = []
+    f3.y_range.factors = []
+
+    msg_div = doc.get_model_by_name('msg_div')
+    msg_div.text = ' '
 
     # check for inconsistencies
     check_incons_cb = partial(_check_for_inconsistencies, doc)
     doc.add_next_tick_callback(check_incons_cb)
 
+    return
 #######################################################################
 def add_node_cds_row(doc):
     _nodes_df = doc.nodes_CDS.to_df()
@@ -260,6 +258,7 @@ def add_node_cds_row(doc):
     doc.nodes_CDS.selected.indices = []
     doc.edges_CDS.selected.indices = []
 
+    return
 #######################################################################
 def add_edge_cds_row(doc):
     _edges_df = doc.edges_CDS.to_df()
@@ -291,6 +290,7 @@ def add_edge_cds_row(doc):
     doc.nodes_CDS.selected.indices = []
     doc.edges_CDS.selected.indices = []
 
+    return
 #######################################################################
 def del_edges_cds_rows(doc):
     doc.dont_update_fcm_layout_dict = False
@@ -315,6 +315,7 @@ def del_edges_cds_rows(doc):
     # Uncheck the rest of DataTable rows
     doc.edges_CDS.selected.indices = []
 
+    return
 #######################################################################
 def del_nodes_cds_rows(doc):
     doc.deleting_rows_from_nodes_DataTable = True
@@ -378,6 +379,7 @@ def del_nodes_cds_rows(doc):
 
     doc.deleting_rows_from_nodes_DataTable = False
 
+    return
 #######################################################################
 def update_fcm_layout_dict(attr, old, new, doc, who):
     _dict = doc.fcm_layout_dict
@@ -402,3 +404,5 @@ def update_fcm_layout_dict(attr, old, new, doc, who):
                     del doc.edges_CDS.data['index']
                 doc.dont_update_fcm_layout_dict = False
             doc.fcm_layout_dict = _update_fcm_dict(doc, _dict)
+
+    return

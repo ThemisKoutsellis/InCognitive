@@ -1,7 +1,7 @@
 # xlparse.py
 
 """This module provides a function, 'get_fcm_layout', which
-returns one of the core dictionaries, 'fcm_layout_dict', of
+returns the core dictionarυ, 'fcm_layout_dict', of
 the InCognitive application.
 
 The 'fcm_layout_dict' dict is imported through many backend
@@ -26,10 +26,10 @@ The 1st sheet provides info on all the FCM nodes regardless of
 being input, intermediate or output nodes.
 It consists of five (5) columns:
     col1 : 'nodes order'
-        The name of the nodes by the desired order. The order of cols
+        The name of the nodes in the desired order. The order of cols
         and rows of the weight matrix are consistent to this order.
     col2 : 'node description'
-        A brief description of each node i.e. its system functionality
+        A brief description of each node
     col3 : 'initial value'
         The initial node values before the FCM simulation. For further
         info see https://doi.org/10.1007/s12351-022-00717-x
@@ -59,13 +59,13 @@ The 3rd sheet provides info on the FCM edges. Each edge is characterized
 by the 'source' and 'target' node; i.e. the beginning and ending node,
 respectivelly. Moreover, there is a weight value assigned on each edge.
 This weight value indicates the correlation of the target node's value
-of time instance t with the source node's value of time instance t-lag.
+with the source node's value.
 
 The layout of the 3rd sheet consist of forth (4) columns:
     col1 : 'source node'
-        The source node, the beginning node, of the edge.
+        The source node, the beginning node of the edge.
     col2 : 'target node'
-        The target node, ending node, of the edge.
+        The target node, ending node of the edge.
     col3 : 'weight'
         the weight of the edge.
     col4 : 'lag'
@@ -112,8 +112,7 @@ def get_fcm_layout(df_nodes_order, df_fcm_topology, df_in_out_nodes):
             9. 'target_nodes'
             10. 'weights'
             11. 'lags'
-
-        """
+    """
 
     # initialize fcm_layout_dict dctionary
     fcm_layout_dict = {}

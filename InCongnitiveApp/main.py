@@ -20,6 +20,7 @@ from frontendcode.callbacks import *
 from frontendcode.wpage_layouts import *
 from frontendcode.internal_functions import _update_graph_renderer
 
+
 # ---------------------------------------------------------------------
 # Session's variables   ------------------------------------------------
 # ---------------------------------------------------------------------
@@ -177,11 +178,11 @@ weight_sd_spinner.on_change('value', set_weights_sd_cb)
 are_zero_weights_variable_cb = partial(are_zero_weights_rand_var, doc=current_doc)
 variable_zero_weights_rb.on_click(are_zero_weights_variable_cb)
 
-clear_allert_msg_div_cb = partial(clear_allert_msg_div, doc=current_doc)
-fcm_plot.on_change('renderers', clear_allert_msg_div_cb)
+#clear_allert_msg_div_cb = partial(clear_allert_msg_div, doc=current_doc)
+#fcm_plot.on_change('renderers', clear_allert_msg_div_cb)
 
-clear_allert_msg_div_cb = partial(collect_global_var, doc=current_doc)
-execute_btn.on_click(clear_allert_msg_div_cb)
+collect_global_var_cb = partial(collect_global_var, doc=current_doc)
+execute_btn.on_click(collect_global_var_cb)
 
 add_edge_cds_row_cb = partial(add_edge_cds_row, doc=current_doc)
 add_edge_row.on_click(add_edge_cds_row_cb)
@@ -214,7 +215,6 @@ current_doc.edges_CDS.on_change('data',edges_CDS_changed_cb)
 ) = _update_graph_renderer(
     current_doc.fcm_layout_dict
 )
-fcm_plot.renderers = []
 fcm_plot.renderers = [graph_renderer, labels_renderer]
 
 # ---------------------------------------------------------------------

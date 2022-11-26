@@ -221,7 +221,7 @@ class MCarloFcm(object):
         '''Deleting the MCarloFcm Object'''
         MCarloFcm._number_of_fcm_mc -= 1
         class_name = self.__class__.__name__
-        print(class_name, "destroyed")
+        #print(class_name, "destroyed")
 
     ###################################################################
     def _find_a(self, m, sd):

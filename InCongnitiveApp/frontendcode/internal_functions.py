@@ -4,6 +4,7 @@ import bisect
 import operator
 import pandas as pd
 import numpy as np
+from time import sleep
 
 import networkx as nx
 from functools import partial
@@ -24,7 +25,6 @@ from backendcode.fcm_layout_parameters import (
 
 __all__ = (
     '_plot_results',
-    '_display_msg',
     '_update_graph_renderer',
     '_excecute_fcmmc',
     '_check_for_inconsistencies',
@@ -32,28 +32,11 @@ __all__ = (
 )
 
 #######################################################################
-def _display_msg(div, msg=' ', msg_type='alert'):
-
-    def _show_msg():
-        div.text = str(msg)
-        # style of msg str
-        if msg_type=='error':
-            div.style= {'font-size': '100%', 'color': 'red'}
-        elif msg_type=='alert':
-            div.style= {'font-size': '100%', 'color': 'blue'}
-        elif msg_type=='info':
-            div.style= {'font-size': '100%', 'color': 'black'}
-        else:
-            div.style= {'font-size': '100%', 'color': 'green'}
-
-    _show_msg()
-
-#######################################################################
 def _ridge(category, data, scale=20):
     return list(zip([category]*len(data), scale*data))
 
 #######################################################################
-def plot_results(f, _x, node_mc_values, baseline_node_values):
+def _plot_results(f, _x, node_mc_values, baseline_node_values):
 
     source = ColumnDataSource(data=dict())
 
@@ -105,6 +88,7 @@ def plot_results(f, _x, node_mc_values, baseline_node_values):
                     size=7, color="red"
                 )
 
+    return
 #######################################################################
 def _rearrange_nodes(node_data_df, input_nodes, output_nodes):
     ''' This function rearrange the
@@ -237,9 +221,7 @@ def _update_graph_renderer(fcm_layout_dict):
         text_font_size='10pt',
         xoffset=0.07,
         yoffset=0.05,
-        #height=40,
-        #width=400,
-        )
+)
 
     bokeh_labels_fig = hv.render(hv_labels_renderer)
     bokeh_labels_fig_renderers = bokeh_labels_fig.renderers
@@ -253,6 +235,7 @@ def _update_graph_renderer(fcm_layout_dict):
 
 #######################################################################
 def _excecute_fcmmc(doc):
+    sleep(0.5)
 
     # Execute FCM-MC after passing the tests of values inconsistency
     ###################################################################
@@ -283,9 +266,6 @@ def _excecute_fcmmc(doc):
     f2 = doc.get_model_by_name('f2')
     f3 = doc.get_model_by_name('f3')
 
-    lambda_div = doc.get_model_by_name('lambda_div')
-    alert_msg_div = doc.get_model_by_name('alert_msg_div')
-
     # Initialize Figures 1,2 & 3
     def _set_x_range(start, end):
         f1.x_range.start = start
@@ -307,39 +287,41 @@ def _excecute_fcmmc(doc):
         _set_x_range(-1,1)
 
     # Plot Figures 1,2 & 3
-    plot_results(
+    _plot_results(
         f1, _x,
         input_nodes_mc_values,
         baseline_input_nodes_values
     )
-    plot_results(
+    _plot_results(
         f2, _x,
         intermediate_nodes_mc_values,
         baseline_intermediate_nodes_values
     )
-    plot_results(
+    _plot_results(
         f3, _x,
         output_nodes_mc_values,
         baseline_output_nodes_values
     )
 
     # Final display msgs
-    _error_str = (
+    msg_div = doc.get_model_by_name('msg_div')
+    _msg_str = (
         'Execution ended successfully!'
         ' Transfer function: λ = {0}'.format(mc_lambda)
     )
-    _display_msg(lambda_div, msg=_error_str, msg_type='success')
-    _display_msg(alert_msg_div, msg='', msg_type='success')
+    msg_div.text = _msg_str
+    msg_div.style= {'font-size': '100%', 'color': 'green'}
+
     return
 
 #######################################################################
-def _display_last_exec_msg(doc, _error_str, _lambda_div_str):
+def _display_last_exec_msg(doc, msg_text):
 
-    lambda_div = doc.get_model_by_name('lambda_div')
-    alert_msg_div = doc.get_model_by_name('alert_msg_div')
+    sleep(0.5)
+    msg_div = doc.get_model_by_name('msg_div')
+    msg_div.text = msg_text
+    msg_div.style= {'font-size': '100%', 'color': 'red'}
 
-    #_display_msg(alert_msg_div, msg=_error_str, msg_type='alert')
-    #_display_msg(lambda_div, msg=_error_str, msg_type='alert')
     return
 
 #######################################################################
@@ -363,8 +345,8 @@ def _check_lambdas(doc):
     )
     w_matrix = get_w_matrix(nx_graph, nodes_order, input_nodes, auto_w)
 
-    # If we have FCM-MC is not allowed to have
-    # lambda greater than the autoselect value
+    # If we have FCM-MC, it is not allowed to have
+    # lambda greater than the autoselect value.
     # FCM-MC case:
     # 1. Input nodes are random variables, weight not.
     _expr1 = (doc.iter_on_input_nodes>1) and (doc.iter_on_weights<2)
@@ -376,16 +358,16 @@ def _check_lambdas(doc):
     _FCMMC_expr = _expr1 or _expr2 or _expr3
 
     if _FCMMC_expr:
-        # This variable is necessary to the backend code
+        # This variable is necessary to the backend code.
         # If False, no normalization procedure. Otherwise,
         # perform normalization.
         doc.FCMMC = True
     else:
         doc.FCMMC = False
 
-    # if we have FCMMC and the autselect_lambda is active
-    # (equivalently, doc.lamda==None) there is no need to
-    # check the lambda parameter for consistency.
+    # If we have FCMMC and the autselect_lambda is active
+    # (equivalently, doc.lamda==None), there is no need to
+    # check the lambda parameter for inconsistency.
     if _FCMMC_expr and doc.lamda:
         (
             _max_accepted_lambda,
@@ -522,12 +504,10 @@ def _check_for_source_nodes(doc):
 #######################################################################
 def _check_for_inconsistencies(doc):
     # get necessary widgets
-    lambda_div = doc.get_model_by_name('lambda_div')
-    alert_msg_div = doc.get_model_by_name('alert_msg_div')
-    upload_xlsx_wgt = doc.get_model_by_name('upload_xlsx_wgt')
+    msg_div = doc.get_model_by_name('msg_div')
 
     # initialize parameters
-    _error_str = ' '
+    _msg_str = ' '
     proceed = False
 
     _check__no_fcm_dict_layout = True
@@ -592,53 +572,51 @@ def _check_for_inconsistencies(doc):
     # If-statements in that order. Do not change!
     proceed = False
     if _check__no_fcm_dict_layout:
-        _error_str = '[ERROR]: FCM layout not given!'
+        _msg_str = '[ERROR]: FCM layout not given!'
     elif _check__no_source_nodes:
-        _error_str = '[ERROR]: Some source-node values are "NaN"!'
+        _msg_str = '[ERROR]: Some source-node values are "NaN"!'
     elif _check__no_weight_values:
-        _error_str = '[ERROR]:  Some weight values are "NaN"!'
+        _msg_str = '[ERROR]:  Some weight values are "NaN"!'
     elif _check__no_valid_weight_values:
-        _error_str = '[ERROR]:  Some weight values are out of range!'
+        _msg_str = '[ERROR]:  Some weight values are out of range!'
     elif _check__no_initial_node_values:
-        _error_str = '[ERROR]: Some initial node values are "NaN"!'
+        _msg_str = '[ERROR]: Some initial node values are "NaN"!'
     elif _check__no_valid_initial_node_values:
-        _error_str = ('[ERROR] The transfer function is: {0}. '
+        _msg_str = ('[ERROR] The transfer function is: {0}. '
             'Some of the initial node values are out of'
             ' range, {1}.'.format(doc.trans_func, range_str)
         )
     elif _check__no_auto_weight_values:
-        _error_str = '[ERROR]:  Some auto-weight values are "NaN"!'
+        _msg_str = '[ERROR]:  Some auto-weight values are "NaN"!'
     elif _check__no_valid_auto_weight_values:
-        _error_str = '[ERROR]:  Some auto-weight values are out of range!'
+        _msg_str = '[ERROR]:  Some auto-weight values are out of range!'
     elif _check__no_valid_mc_iterations:
-        _error_str = ('[ERROR]: The number of MC iterations'
+        _msg_str = ('[ERROR]: The number of MC iterations'
                     ' (Weight & Input) must be equal!')
     elif _check__no_valid_lambda:
-        _error_str = ('[ERROR] Max-accepted-λ* (={0})'
+        _msg_str = ('[ERROR] Max-accepted-λ* (={0})'
             ' is smaller than the given parameter λ (={1}).\n'
             '* is the parameter λ which guarantees'
             ' 100% FCM convergence for all(!) iterations.'.format(
                 _max_accepted_lambda, doc.lamda)
         )
     else:
-        _error_str = 'Please wait ...'
+        _msg_str = 'Please wait ...'
         proceed = True
 
-    print('_error_str= ', _error_str)
-    #_display_msg(lambda_div, msg=_error_str, msg_type='alert')
+    msg_div.text = _msg_str
+    msg_div.style= {'font-size': '100%', 'color': 'blue'}
 
     # call the FCM-MC function on next tick
     if proceed:
-        print('PROCEED')
-        _display_msg(lambda_div, msg=_error_str, msg_type='alert')
-        fcmmc_cb = partial(_excecute_fcmmc, doc)
+        fcmmc_cb = partial(_excecute_fcmmc, doc=doc)
         doc.add_next_tick_callback(fcmmc_cb)
     else:
-        print('DONT PROCEED')
-        _display_msg(lambda_div, msg=_error_str, msg_type='alert')
         display_last_exec_msg_cb = partial(
-            _display_last_exec_msg, doc, _error_str, _error_str)
+            _display_last_exec_msg, doc=doc, msg_text=_msg_str)
         doc.add_next_tick_callback(display_last_exec_msg_cb)
+
+    return
 
 #######################################################################
 def _check_for_missing_nodes(doc):
@@ -733,8 +711,8 @@ def _add_missing_nodes(doc, _missing_nodes):
     )
     #Change the doc.CDS
     doc.nodes_CDS.data = doc.nodes_CDS.from_df(_nodes_df)
-    # delete the 'index' column.
-    # It causes errors in other parts of the code.
+    # Delete the 'index' column because it causes
+    # errors in other parts of the code.
     if 'index' in doc.nodes_CDS.data or doc.edges_CDS.data:
         doc.dont_update_fcm_layout_dict = True
         if 'index' in doc.nodes_CDS.data:
@@ -845,7 +823,6 @@ def _fill_the_fcm_layout_dict(
         _dict['weights'] = _weights
         _dict['lags'] = _lags
     else:
-        # TODO: replace NaN with None
         pass
 
     return _dict
@@ -853,16 +830,16 @@ def _fill_the_fcm_layout_dict(
 #######################################################################
 def _update_fcm_dict(doc, _dict):
 
-    # check if all nodes on edges DataTable exist in Nodes-DataTable
-    # too. if not, then add the corresponding rows to Nodes-DataTable.
+    # Check if all nodes of Edges-DataTable exist in Nodes-DataTable
+    # as well. If not, then add the corresponding rows to Nodes-DataTable.
     # ----------------------------------
     _missing_nodes = _check_for_missing_nodes(doc)
 
     if _missing_nodes:
         _add_missing_nodes(doc, _missing_nodes)
-        # after the above command the _update_fcm_dict
+        # After the above command the _update_fcm_dict
         # will be called again because the CDS changed!
-        # in the second invokation, the following 'else'
+        # In the second invokation, the following 'else'
         # statement will be executed.
     else:
         (_nodes_with_nan_df,
@@ -883,7 +860,6 @@ def _update_fcm_dict(doc, _dict):
             (graph_renderer,
              labels_renderer
             ) = _update_graph_renderer(_dict)
-            fcm_plot.renderers = []
             fcm_plot.renderers = [graph_renderer, labels_renderer]
 
     return _dict

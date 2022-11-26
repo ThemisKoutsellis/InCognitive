@@ -76,10 +76,18 @@ class FCMap(object):
         the weightmatrix of the FCM.
     lag_matrix :
         the lag matrix of the FCM.
+    normalization: bool
+        default value = True. if True, apply normalization
+        (see [1] & [2]) to the results of the intermediate
+        and output nodes. Otherwise, False.
 
     * [1] 'Parameter analysis for sigmoid and
-    hyperbolic transfer functions of fuzzy cognitive
-    maps', https://doi.org/10.1007/s12351-022-00717-x
+    hyperbolic transfer functions of fuzzy cognitive maps',
+    https://doi.org/10.1007/s12351-022-00717-x
+
+    * [2] 'Normalising the Output of Fuzzy Cognitive Maps'
+    IISA-2022 Confernece.
+
     """
 
     # public constants
@@ -109,8 +117,8 @@ class FCMap(object):
         self,
         fcm_layout_dict,
         activation_function,
-        dont_plot_graphs=False
-        ):
+        normalization = True,
+    ):
         """Intialize the FCMap object.
 
         Parameters
@@ -126,7 +134,6 @@ class FCMap(object):
 
         self.ITERATIONS = 300
         self.fcm_layout_dict = fcm_layout_dict
-        self.dont_plot_graphs = dont_plot_graphs
         self.nodes_order = fcm_layout_dict['nodes_order']
         self.nodes_discription = fcm_layout_dict['nodes_discription']
         self.input_nodes = fcm_layout_dict['input_nodes']
@@ -164,6 +171,7 @@ class FCMap(object):
             self.nodes_order,
             self.auto_lags,
         )
+        self.normalization = normalization
 
         # find the minimum number of required iterations
         if self.input_nodes and self.output_nodes:

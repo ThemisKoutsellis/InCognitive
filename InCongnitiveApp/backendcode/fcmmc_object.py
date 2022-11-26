@@ -305,6 +305,7 @@ class MCarloFcm(object):
                 fcm_object.lag_matrix,
                 fcm_object.nodes_order,
                 fcm_object.ITERATIONS,
+                fcm_object.normalization,
             )
 
             # store the outcome of each iteration:
@@ -408,6 +409,7 @@ class MCarloFcm(object):
                 fcm_object.lag_matrix,
                 fcm_object.nodes_order,
                 fcm_object.ITERATIONS,
+                fcm_object.normalization,
             )
 
             # store the outcome of each iteration:
@@ -510,6 +512,7 @@ class MCarloFcm(object):
                 fcm_object.lag_matrix,
                 fcm_object.nodes_order,
                 fcm_object.ITERATIONS,
+                fcm_object.normalization,
             )
 
             # store the outcome of each iteration:
@@ -578,6 +581,7 @@ class MCarloFcm(object):
                 fcm_object.lag_matrix,
                 fcm_object.nodes_order,
                 fcm_object.ITERATIONS,
+                fcm_object.normalization,
             )
 
             if not normilised_intermediate_df.empty:
@@ -632,6 +636,7 @@ class MCarloFcm(object):
                 fcm_object.lag_matrix,
                 fcm_object.nodes_order,
                 fcm_object.ITERATIONS,
+                fcm_object.normalization,
             )
 
             self.baseline_output_node_values = \
@@ -677,6 +682,7 @@ class MCarloFcm(object):
                 fcm_object.lag_matrix,
                 fcm_object.nodes_order,
                 fcm_object.ITERATIONS,
+                fcm_object.normalization,
             )
 
             self.baseline_output_node_values = \
@@ -722,6 +728,7 @@ class MCarloFcm(object):
                 fcm_object.lag_matrix,
                 fcm_object.nodes_order,
                 fcm_object.ITERATIONS,
+                fcm_object.normalization,
             )
 
             self.baseline_output_node_values = \

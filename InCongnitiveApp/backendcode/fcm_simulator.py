@@ -109,41 +109,54 @@ def _normalise_outcomes(
     lamda,
     intermediate_x_f,
     output_x_f,
+    normalization = True,
     ):
 
-    if activation_function_name=='sigmoid':
-        # Intermediate nodes
-        if not intermediate_df.empty:
-            _last_row = intermediate_df.tail(1).values[0]
-            _norm_last_row = [
-                v  +((0.09*lamda)*intermediate_x_f[i])
-                for i,v in enumerate(_last_row)
-            ]
-            normilised_intermediate_df = intermediate_df
-            normilised_intermediate_df.iloc[-1,:] = _norm_last_row
-        else:
-            normilised_intermediate_df = pd.DataFrame()
+    if normalization:
+        if activation_function_name=='sigmoid':
+            # Intermediate nodes
+            if not intermediate_df.empty:
+                _last_row = intermediate_df.tail(1).values[0]
+                _norm_last_row = [
+                    v  +((0.09*lamda)*intermediate_x_f[i])
+                    for i,v in enumerate(_last_row)
+                ]
+                normilised_intermediate_df = intermediate_df
+                normilised_intermediate_df.iloc[-1,:] = _norm_last_row
+            else:
+                normilised_intermediate_df = pd.DataFrame()
 
-        # Output nodes
-        if not output_df.empty:
-            _last_row = output_df.tail(1).values[0]
-            _norm_last_row = [
-                v  +((0.09*lamda)*output_x_f[i])
-                for i,v in enumerate(_last_row)
-            ]
-            normilised_output_df = output_df
-            normilised_output_df.iloc[-1,:] = _norm_last_row
-        else:
-            normilised_output_df = pd.DataFrame()
-    elif activation_function_name=='hyperbolic':
+            # Output nodes
+            if not output_df.empty:
+                _last_row = output_df.tail(1).values[0]
+                _norm_last_row = [
+                    v  +((0.09*lamda)*output_x_f[i])
+                    for i,v in enumerate(_last_row)
+                ]
+                normilised_output_df = output_df
+                normilised_output_df.iloc[-1,:] = _norm_last_row
+            else:
+                normilised_output_df = pd.DataFrame()
+        elif activation_function_name=='hyperbolic':
+            # Intermediate nodes
+            if not intermediate_df.empty:
+                normilised_intermediate_df = intermediate_df*1.733
+            else:
+                normilised_intermediate_df = pd.DataFrame()
+            # Output nodes
+            if not output_df.empty:
+                normilised_output_df = output_df*1.733
+            else:
+                normilised_output_df = pd.DataFrame()
+    else:
         # Intermediate nodes
         if not intermediate_df.empty:
-            normilised_intermediate_df = intermediate_df*1.733
+            normilised_intermediate_df = intermediate_df
         else:
             normilised_intermediate_df = pd.DataFrame()
         # Output nodes
         if not output_df.empty:
-            normilised_output_df = output_df*1.733
+            normilised_output_df = output_df
         else:
             normilised_output_df = pd.DataFrame()
 
@@ -194,6 +207,7 @@ def exec_fcm_simulation(
     lag_matrix,
     nodes_order,
     ITERATIONS,
+    normalization = True,
     ):
     """This public function deploys the FCM simulation [1].
 
@@ -246,6 +260,9 @@ def exec_fcm_simulation(
         The max number of FCM simulation iteration [1]. After
         this number the function stops the FCM simulation and
         returns the node values as is.
+    normalization : bool
+        default value = True. if True, apply normalization (see [1] & [2])
+        to the results of the intermediate and ouutut nodes. Otherwise, False.
 
     Returns
     -------
@@ -317,6 +334,7 @@ def exec_fcm_simulation(
         lamda,
         intermediate_x_f,
         output_x_f,
+        normalization,
     )
     # derive the final values
     final_A_values= {}

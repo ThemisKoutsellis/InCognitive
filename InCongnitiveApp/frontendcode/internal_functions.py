@@ -254,7 +254,7 @@ def _update_graph_renderer(fcm_layout_dict):
 #######################################################################
 def _excecute_fcmmc(doc):
 
-    # Execute FCM-MC Sim after passing the test of values inconsistency
+    # Execute FCM-MC after passing the tests of values inconsistency
     ###################################################################
     # Monte Carlo Simulation
     (
@@ -275,6 +275,7 @@ def _excecute_fcmmc(doc):
         doc.trans_func,
         doc.lamda,
         doc.autoslect_lambda,
+        doc.FCMMC,
     )
     # Display results
     # -----------------------------------------------------------------
@@ -375,7 +376,7 @@ def _check_lambdas(doc):
     _FCMMC_expr = _expr1 or _expr2 or _expr3
 
     if _FCMMC_expr:
-        # This variable is needed for the backend code
+        # This variable is necessary to the backend code
         # If False, no normalization procedure. Otherwise,
         # perform normalization.
         doc.FCMMC = True

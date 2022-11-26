@@ -26,6 +26,7 @@ def monte_carlo_simulation(
     transfer_func,
     lamda,
     lamda_autoslect,
+    normalization,
 ):
 
     """
@@ -65,6 +66,9 @@ def monte_carlo_simulation(
     lamda_autoslect:
         True of the user wants the app to choose the lambda
         paremeter of the FCM tranfer function based on [1].
+    normalization: Bool
+        True if the user wants to apply normalization (see [1] & [2])
+        to the intermediate and output nodes results. Otherwise, False.
 
     Returns
     -------
@@ -125,7 +129,7 @@ def monte_carlo_simulation(
         raise Exception(_iteration_dont_match_warning)
 
 
-    fcm = FCMap(fcm_layout_dict, transfer_func)
+    fcm = FCMap(fcm_layout_dict, transfer_func, normalization)
 
     fcm_mc = MCarloFcm(
       inputs_iterations,

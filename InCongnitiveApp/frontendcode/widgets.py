@@ -306,7 +306,7 @@ tr_function_select = Select(
 # Widget No.11: Set labbda:
 lambda_spinner = Spinner(
     title= 'Set lambda value',
-    low=0.001, high=20, step=0.5, value=0.1, width=150,
+    low=0.001, high=100, step=0.5, value=0.1, width=150,
     disabled=True,
     name='lambda_spinner',
 )

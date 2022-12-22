@@ -14,6 +14,9 @@ from bokeh.models import ColumnDataSource
 from bokeh.layouts import layout, column, row
 #From bokeh.models.layouts import Spacer
 
+from bokeh.models.callbacks import CustomJS
+from os.path import join, dirname
+
 # import internal modules
 from frontendcode.widgets import *
 from frontendcode.callbacks import *
@@ -124,6 +127,7 @@ fcm_data_manager_layout = column(
     datatables_layout,
     separator(width=550, height=15),
     save_bn,
+    callback_holder
 )
 
 fcm_display_layout = layout(
@@ -203,6 +207,13 @@ current_doc.nodes_CDS.on_change('data',nodes_CDS_changed_cb)
 edges_CDS_changed_cb = partial(
     update_fcm_layout_dict, doc=current_doc, who='edgesCDS')
 current_doc.edges_CDS.on_change('data',edges_CDS_changed_cb)
+
+# Javascript Callback
+JScallback = CustomJS(code=open(join(dirname(__file__), "static\\js\\download.js")).read())
+callback_holder.js_on_change('text', JScallback)
+
+save_cb = partial(dict_to_js, doc=current_doc, cb_holder = callback_holder)
+save_bn.on_click(save_cb)
 
 # ---------------------------------------------------------------------
 # Initialize doc   ----------------------------------------------------

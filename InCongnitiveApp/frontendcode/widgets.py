@@ -5,7 +5,7 @@ from bokeh.models.widgets import FileInput, NumberEditor, TextEditor
 from bokeh.models import (
     Div, Button, Spinner, CheckboxGroup, Select, Panel, Tabs,
     FactorRange, TableColumn, BoxZoomTool, PanTool, ResetTool,
-    HoverTool, TapTool, WheelZoomTool, SaveTool,
+    HoverTool, TapTool, WheelZoomTool, SaveTool, PreText
 )
 
 __all__ = (
@@ -45,6 +45,7 @@ __all__ = (
     'del_edge_row',
     'del_node_row',
     'add_node_row',
+    'callback_holder'
 )
 
 
@@ -366,4 +367,9 @@ msg_div = Div(name='msg_div')
 save_bn = Button(
     label="Save layout to xlsx format",
     button_type="success", width=550,
+)
+
+callback_holder = PreText(
+    name='cb_holder',
+    text = '',
 )

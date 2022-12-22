@@ -27,3 +27,6 @@ a:hover {
 color: #636D22;
 }
 
+pre {
+    display: none !important;
+}

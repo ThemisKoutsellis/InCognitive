@@ -10,9 +10,6 @@ from bokeh.models import (
 
 __all__ = (
     'web_page_header',
-    'acknowledgements',
-    'license',
-    'github_repo',
     'separator',
     'excel_parse_msg_div',
     'upload_xlsx_wgt',
@@ -49,7 +46,8 @@ __all__ = (
 )
 
 
-PARIS_REINFORCE_COLOR = '#9CAB35'
+#PARIS_REINFORCE_COLOR = '#9CAB35'
+PARIS_REINFORCE_COLOR = '#2f2f2f'
 """str: The default RGB color of PARIS REINFORCE
 """
 
@@ -60,45 +58,13 @@ PARIS_REINFORCE_COLOR = '#9CAB35'
 # Header Div:
 web_page_header = Div(
     text=("<figure>"
-          "<img src='InCongnitiveApp/static/images/in_cognitive_logo.png' "
-          "width='400' height='45' "
+          "<img src='InCongnitiveApp/static/images/InCognitive2.png' "
+          "width='650' height='100' "
           "alt='FCM Simulation application'"
           "</figure>"
           ),
-          width=400, height=60,
+          width=650, height=100
     )
-
-# Acknowledgements Div:
-acknowledgements = Div(
-    text=(
-        'Powered by: '
-        '<a href="https://www.python.org/" target=_blank>Python 3.7.3</a>'
-        ', '
-        '<a href="https://holoviews.org" target=_blank> HoloViews 1.14.8</a>'
-        ' and '
-        '<a href="https://docs.bokeh.org/en/latest/index.html"'
-        ' target=_blank>Bokeh 2.3.3.</a>'
-        ),
-    width=400,
-    style={'font-size': '100%', 'color': PARIS_REINFORCE_COLOR}
-)
-
-# License Div:
-license = Div(
-    text=('License:'
-          '<a href="https://creativecommons.org/licenses/by-nc-nd/4.0/"'
-          ' target=_blank>(CC BY-NC-ND 4.0)</a>'),
-    width=400,
-    style={'font-size': '100%', 'color': PARIS_REINFORCE_COLOR}
-)
-
-# Github repository Div:
-github_repo = Div(
-    text=('<a href="https://github.com/ThemisKoutsellis/InCognitive"'
-          ' target=_blank>GitHub repository</a>'),
-    width=400,
-    style={'font-size': '100%', 'color': PARIS_REINFORCE_COLOR}
-)
 
 # Separator line Div:
 def separator(width=550, height=5):
@@ -137,7 +103,7 @@ nodes_columns = [
 nodes_data_table_title = Div(
     text='FCM nodes',
     width=400,
-    style={'font-size': '100%', 'color': PARIS_REINFORCE_COLOR}
+    style={'font-size': '120%', 'color': PARIS_REINFORCE_COLOR}
 )
 
 add_node_row = Button(
@@ -166,7 +132,7 @@ edges_columns = [
 edges_data_table_title = Div(
     text='FCM node interconnections',
     width=400,
-    style={'font-size': '100%', 'color': PARIS_REINFORCE_COLOR}
+    style={'font-size': '120%', 'color': PARIS_REINFORCE_COLOR}
 )
 
 add_edge_row = Button(
@@ -196,7 +162,7 @@ tools = [hovertool, taptool, ResetTool(), PanTool(),
 
 fcm_plot = figure(
     height=650, width=900,
-    title="FCP display",
+    #title="FCP display",
     toolbar_location='right',
     toolbar_sticky = False,
     tools=tools,
@@ -227,6 +193,10 @@ fcm_plot.xaxis.axis_line_color = None
 fcm_plot.yaxis.axis_line_width = 0
 fcm_plot.yaxis.axis_line_color = None
 
+
+fcm_plot.background_fill_color = "#3f3f3f"
+fcm_plot.background_fill_alpha = 0.5
+fcm_plot.border_fill_color = "whitesmoke"
 
 # Widget No.2: Collect global variables
 execute_btn = Button(
@@ -326,6 +296,8 @@ f1 = figure(
    name='f1'
 )
 f1.toolbar.logo = None
+f1.background_fill_color = "#3f3f3f"
+f1.background_fill_alpha = 0.5
 
 # -----------------------------------
 # Figure 2.: Intermediate nodes
@@ -340,6 +312,8 @@ f2 = figure(
     name='f2'
 )
 f2.toolbar.logo = None
+f2.background_fill_color = "#3f3f3f"
+f2.background_fill_alpha = 0.5
 
 # -----------------------------------
 # Figure 3.: Output nodes
@@ -354,6 +328,8 @@ f3 = figure(
     name='f3'
 )
 f3.toolbar.logo = None
+f3.background_fill_color = "#3f3f3f"
+f3.background_fill_alpha = 0.5
 
 # ####################################################
 _tab1 = Panel(child=f1, title="Input nodes")
@@ -365,8 +341,8 @@ tabs = Tabs(tabs=[_tab1, _tab2, _tab3])
 msg_div = Div(name='msg_div')
 
 save_bn = Button(
-    label="Save layout to xlsx format",
-    button_type="success", width=550,
+    label="Save layout",
+    button_type="success", width=200,
 )
 
 callback_holder = PreText(

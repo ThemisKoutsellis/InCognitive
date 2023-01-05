@@ -1,32 +1,264 @@
-.bk-root .bk-btn-success {
-color: #FDFEFE;
-background-color: #9CAB35;
-border-color: #9CAB35;
-}
-.bk-root .bk-btn-success:focus {
-color: #FDFEFE;
-background-color: #9CAB35;
-border-color: #9CAB35;
-}
-.bk-root .bk-btn-success:active {
-color: #FDFEFE;
-background-color: #9CAB35;
-border-color: #9CAB35;
-}
-.bk-root .bk-btn-success:hover {
-color: #FDFEFE;
-background-color: #7F8C2C;
-border-color: #7F8C2C;
-}
 
-a {
-color: #7F8C2C;
-}
 
-a:hover {
-color: #636D22;
-}
+/* Color Pallete */
+:root {
 
-pre {
-    display: none !important;
-}
+    --dark_card_bg: #F0F0F0;
+    --links: #185d85;
+    --links_hover: #0c4668;
+  
+  }
+  
+  
+/* Google Font import */
+  @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500&family=Libre+Franklin:wght@300;900&display=swap');
+
+
+  /***************************/
+  /* Bokeh Widgets override */
+  /*************************/
+  
+           
+  .bk-root .bk-btn-success {
+    background-image: linear-gradient(to right, #1A2980 0%, #26D0CE  51%, #1A2980  100%);
+    text-align: center;
+    text-transform: uppercase;
+    transition: 0.5s;
+    background-size: 200% auto;
+    color: white;            
+    box-shadow: 0 0 20px #eee;
+    border-radius: 10px;
+    display: block;
+  }
+  
+  .bk-root .bk-btn-success:hover {
+    background-position: right center; /* change the direction of the change here */
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  
+  /* hide dummy bokeh pretext */
+  pre {
+      display: none !important;
+  }
+  
+  .bk-root {
+     
+    font-family: 'Chakra Petch', sans-serif !important;
+  }
+  
+  .bk .bk-data-table {
+    font-family: 'Libre Franklin', sans-serif !important;
+  }
+  
+  
+  /***************/
+  /* HTML Page  */
+  /*************/
+  
+  body{
+    background-image: url('InCongnitiveApp/static/images/bg.png');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: 150% 120%;
+    
+  }
+  
+  a {
+    color: var(--links);
+  }
+    
+  a:hover {
+    color: var(--links_hover);
+  }
+  
+  
+  
+  .grid{
+    display: grid;
+    height: 100vh;
+  
+    grid-template-columns: 0.5fr 0.2fr 0.45fr;
+    grid-template-rows: 0.2fr 0.2fr 0.8fr 1fr 0.1fr;
+  
+  
+    grid-template-areas: 
+      "header header header"
+      "fcm_plot FCP FCP"
+      "fcm_plot nodes edges"
+      "sim results results"
+      "footer footer footer";
+  
+    grid-gap: 1.5rem;
+  
+  }
+  
+  .header{
+    justify-self: center;
+    grid-area: header;
+    padding-bottom: 20px;
+  }
+  
+  .h2{
+    justify-self: center;
+    font-family: 'Chakra Petch', sans-serif !important;
+    font-size: x-large;
+    font-weight: 3rem;
+  }
+  
+  .upload_save{
+    justify-self: start;
+    grid-area: FCP;
+    padding: 10px;
+  
+    border-radius: 15px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  
+    background: var(--dark_card_bg);
+  
+    align-self: center;
+  }
+  
+  .fcm_plot{
+    justify-self: end;
+    grid-area: fcm_plot;
+    padding: 10px;
+  
+    border-radius: 15px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  
+    background: var(--dark_card_bg);
+  }
+  
+  
+  .nodes_dataTable{
+  
+    justify-self: start;
+    grid-area: nodes;
+    padding: 10px;
+  
+    border-radius: 15px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  
+    background: var(--dark_card_bg);
+  
+    align-self: center;
+  }
+  
+  .edges_dataTable{
+    justify-self: start;
+    grid-area: edges;
+    padding: 10px;
+  
+    border-radius: 15px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  
+    background: var(--dark_card_bg);
+  
+    align-self: center;
+  }
+  
+  
+  .sim{
+    grid-area: sim;
+    justify-self: end;
+    padding-right: 10rem;
+    padding: 10px;
+  
+  
+    border-radius: 15px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  
+    background: var(--dark_card_bg);
+  }
+  
+  .results{
+  
+    justify-self: start;
+    grid-area: results;
+    padding: 10px;
+  
+    border-radius: 15px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  
+    background: var(--dark_card_bg);
+  }
+  
+  
+  .footer{
+  
+    justify-self: start;
+  
+    grid-area: footer;
+    margin-top: 5rem;
+    margin-left: 2rem;
+  
+    padding: 5px;
+  
+  }
+  
+  .footer p{
+    display: inline-block;
+    color: white;
+    margin-right: 20px;
+  
+  
+    font-family: 'Chakra Petch', sans-serif !important;
+    font-size: 18px;
+  
+    
+  }
+  
+  
+  @media only screen and (max-width:1550px){
+    
+    .grid{
+      grid-template-columns: 0.5fr 0.5fr;
+      grid-template-rows: 0.2fr 0.2fr 1.5fr 1.5fr 1.5fr 1.5fr 0.1fr;
+      grid-template-areas:
+        "header header"
+        "fcm_plot fcm_plot"
+        "FCP FCP"
+        "nodes edges"
+        "results results"
+        "sim sim"
+        "footer footer"
+        ;
+  
+        place-items: center;
+    }
+  
+  
+  
+    .fcm_plot{
+      justify-self: center;  
+    }
+  
+    .upload_save{
+      justify-self: center;
+    }
+  
+    .nodes_dataTable{
+      margin-left: 2rem;
+      justify-self: end;  
+    }
+  
+    .results{
+      justify-self: center;  
+    }
+    
+    .sim{
+      justify-self: center;
+    }
+  
+  }
+  
+  @media only screen and (max-width:1177px){
+  
+    .nodes_dataTable{
+      margin-left: 1rem;
+    }
+  }
+  
+  

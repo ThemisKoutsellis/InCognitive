@@ -1,16 +1,67 @@
+{% extends base %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
+
+      {% block preamble %} 
       <meta charset="utf-8">
-      {{ bokeh_css }}
-      {{ bokeh_js }}
+      <neta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
       <style type="text/css">{% include 'main.css' %}</style>
       <title>In-cognitive: an FCM Simulator</title>
       <script src="https://cdn.sheetjs.com/xlsx-0.19.1/package/dist/xlsx.mini.min.js"></script>
+      {% endblock %}
     </head>
     <body>
-      {{ plot_div|indent(8) }}
-      {{ plot_script|indent(8) }}
+
+      {% block contents %}
+
+      <div class="grid">
+
+        <div class="header">
+          {{ embed(roots.header) }}
+        </div>
+
+        
+        <div class="upload_save">
+
+          {{ embed(roots.uploadxlsx_layout) }}
+        </div>
+
+        <div class="fcm_plot">
+        <div class="h2">FCM DISPLAY</div>
+          {{ embed(roots.fcm_plot) }}
+        </div>
+
+        <div class="nodes_dataTable">
+          {{ embed(roots.nodes_dataTable) }}
+        </div>
+
+        <div class="edges_dataTable">
+          {{ embed(roots.edges_dataTable) }}
+        </div>
+
+        <div class="sim">
+          <div class="h2">MC SIMULATION</div>
+          <br>
+          {{ embed(roots.simulation_par) }}
+        </div>
+
+        <div class="results">
+          {{ embed(roots.results) }}
+        </div>
+
+        <div class="footer">
+          <p>Powered by: <a href="https://www.python.org/" target=_blank>Python 3.7.3</a>, <a href="https://holoviews.org" target=_blank> HoloViews 1.14.8</a>, <a href="https://docs.bokeh.org/en/latest/index.html" target=_blank>Bokeh 2.3.3.</a> </p>
+          <p>License: <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target=_blank>(CC BY-NC-ND 4.0)</a></p> 
+          <p><a href="https://github.com/ThemisKoutsellis/InCognitive" target=_blank>Github</a></p>
+       </div>
+        
+
+      </div>
+
+      
+      {% endblock %}
+
     </body>
 </html>
 

@@ -4,9 +4,13 @@
 :root {
 
     --dark_card_bg: #F0F0F0;
+    /*
     --links: #185d85;
-    --links_hover: #0c4668;
-  
+    --links_hover: #0c4668;*/
+    
+
+    --links: #58a03c;
+    --links_hover: #293236;
   }
   
   
@@ -18,7 +22,7 @@
   /* Bokeh Widgets override */
   /*************************/
   
-           
+  /*         
   .bk-root .bk-btn-success {
     background-image: linear-gradient(to right, #1A2980 0%, #26D0CE  51%, #1A2980  100%);
     text-align: center;
@@ -32,11 +36,41 @@
   }
   
   .bk-root .bk-btn-success:hover {
-    background-position: right center; /* change the direction of the change here */
+    background-position: right center; 
     color: #fff;
     text-decoration: none;
   }
+*/
+
+/* CSS */
+.bk-root .bk-btn-success {
+  background: linear-gradient(to bottom right, #474838, #9CAB35);
+  border: 0;
+  border-radius: 10px;
+  background-size: 200% auto;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-block;
+  outline: transparent;
+  text-transform: uppercase;
+  text-align: center;
+  text-decoration: none;
   
+  transition: box-shadow .2s ease-in-out;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+}
+
+/*
+.bk-root .bk-btn-success:not([disabled]):focus {
+  box-shadow: 0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgba(71, 186, 239, 0.5), .125rem .125rem 1rem rgba(199, 255, 153, 0.5);
+}*/
+
+.bk-root .bk-btn-success:not([disabled]):hover {
+  box-shadow: 0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgba(110, 112, 72, 0.5), .125rem .125rem 1rem #afbe4b;
+}
   
   /* hide dummy bokeh pretext */
   pre {
@@ -58,7 +92,7 @@
   /*************/
   
   body{
-    background-image: url('InCongnitiveApp/static/images/bg.png');
+    background-image: url('InCongnitiveApp/static/images/bg5.gif');
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: 150% 120%;
@@ -95,9 +129,11 @@
   }
   
   .header{
+    width: 850px;
+    height: 125px;
     justify-self: center;
     grid-area: header;
-    padding-bottom: 20px;
+    padding-bottom: 30px;
   }
   
   .h2{
@@ -200,7 +236,7 @@
   
   .footer p{
     display: inline-block;
-    color: white;
+    color: #282920;
     margin-right: 20px;
   
   

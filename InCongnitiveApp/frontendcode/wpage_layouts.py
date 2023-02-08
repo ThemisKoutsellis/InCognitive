@@ -8,7 +8,7 @@ from bokeh.models import Spacer
 from frontendcode.widgets import *
 
 __all__ = (
-    'web_page_layout',
+    #'web_page_layout',
     'uploadxlsx_layout',
     'input_nodes_layout',
     'weights_layout',
@@ -23,8 +23,8 @@ __all__ = (
 # Webpage layouts  ----------------------------------------------------
 # ---------------------------------------------------------------------
 
-web_page_layout = layout(column(web_page_header))
-web_page_layout.name = "header"
+# web_page_layout = layout(column(web_page_header))
+# web_page_layout.name = "header"
 
 spacer = Spacer(width=20, height=20)
 node_buttons = row(add_node_row, spacer, del_node_row)

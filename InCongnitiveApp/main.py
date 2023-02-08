@@ -231,7 +231,7 @@ edges_CDS_changed_cb = partial(
 current_doc.edges_CDS.on_change('data',edges_CDS_changed_cb)
 
 # Javascript Callback
-JScallback = CustomJS(code=open(join(dirname(__file__), "static\\js\\download.js")).read())
+JScallback = CustomJS(code=open(join(dirname(__file__), "static", "js", "download.js")).read())
 callback_holder.js_on_change('text', JScallback)
 
 save_cb = partial(dict_to_js, doc=current_doc, cb_holder = callback_holder)
@@ -255,7 +255,7 @@ fcm_plot.renderers = [graph_renderer, labels_renderer]
 # ---------------------------------------------------------------------
 
 # Append web page layout to curent bokeh layout
-current_doc.add_root(web_page_layout)
+#current_doc.add_root(web_page_layout)
 current_doc.add_root(fcm_plot)
 current_doc.add_root(uploadxlsx_layout)
 current_doc.add_root(nodes_dt_layout)

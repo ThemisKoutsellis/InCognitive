@@ -9,7 +9,7 @@ from bokeh.models import (
 )
 
 __all__ = (
-    'web_page_header',
+    #'web_page_header',
     'separator',
     'excel_parse_msg_div',
     'upload_xlsx_wgt',
@@ -56,15 +56,15 @@ PARIS_REINFORCE_COLOR = '#2f2f2f'
 # ---------------------------------------------------------------------
 
 # Header Div:
-web_page_header = Div(
-    text=("<figure>"
-          "<img src='InCongnitiveApp/static/images/InCognitive2.png' "
-          "width='650' height='100' "
-          "alt='FCM Simulation application'"
-          "</figure>"
-          ),
-          width=650, height=100
-    )
+# web_page_header = Div(
+#     text=("<figure>"
+#           "<img src='InCongnitiveApp/static/images/InCognitive2.png' "
+#           "width='650' height='100' "
+#           "alt='FCM Simulation application'"
+#           "</figure>"
+#           ),
+#           width=650, height=100
+#     )
 
 # Separator line Div:
 def separator(width=550, height=5):

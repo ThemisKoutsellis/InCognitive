@@ -8,14 +8,13 @@ from bokeh.models import Spacer
 from frontendcode.widgets import *
 
 __all__ = (
+    'web_page_layout',
     'uploadxlsx_layout',
     'input_nodes_layout',
     'weights_layout',
     'lambda_layout',
     'results_layout',
     'simulation_parameters_layout',
-    'fcmmc_layout',
-    'footer_layout',
     'edges_buttons',
     'node_buttons',
 )
@@ -24,7 +23,8 @@ __all__ = (
 # Webpage layouts  ----------------------------------------------------
 # ---------------------------------------------------------------------
 
-uploadxlsx_layout = column(upload_xlsx_wgt, excel_parse_msg_div)
+web_page_layout = layout(column(web_page_header))
+web_page_layout.name = "header"
 
 spacer = Spacer(width=20, height=20)
 node_buttons = row(add_node_row, spacer, del_node_row)
@@ -57,13 +57,11 @@ simulation_parameters_layout = layout(
     separator(width=550, height=15),
     execute_btn,
 )
+simulation_parameters_layout.name = "simulation_par"
 
 results_layout = layout(column(tabs, msg_div))
+results_layout.name = "results"
 
-fcmmc_layout = row(
-    simulation_parameters_layout,
-    spacer,
-    results_layout)
-
-footer_layout = row(acknowledgements, license, github_repo)
+uploadxlsx_layout = layout(row(column(upload_xlsx_wgt, excel_parse_msg_div),save_bn, callback_holder))
+uploadxlsx_layout.name = "uploadxlsx_layout"
 

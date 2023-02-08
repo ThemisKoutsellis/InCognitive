@@ -7,6 +7,8 @@ from base64 import b64decode
 from functools import partial
 from time import sleep
 
+import json
+
 # import internal modules
 from frontendcode.parsers import parse_input_xlsx
 from frontendcode.internal_functions import (
@@ -33,6 +35,7 @@ __all__ = (
     'add_node_cds_row',
     'add_edge_cds_row',
     'update_fcm_layout_dict',
+    'dict_to_js'
 )
 
 #######################################################################
@@ -406,3 +409,13 @@ def update_fcm_layout_dict(attr, old, new, doc, who):
             doc.fcm_layout_dict = _update_fcm_dict(doc, _dict)
 
     return
+
+
+#######################################################################
+def dict_to_js(doc, cb_holder):
+
+    _dict = doc.fcm_layout_dict
+
+    #Update dummy pretext with new dict data and triggers JSCallback attached
+    cb_holder.text = json.dumps(_dict)
+   

@@ -14,6 +14,9 @@ from bokeh.models import ColumnDataSource
 from bokeh.layouts import layout, column, row
 #From bokeh.models.layouts import Spacer
 
+from bokeh.models.callbacks import CustomJS
+from os.path import join, dirname
+
 # import internal modules
 from frontendcode.widgets import *
 from frontendcode.callbacks import *
@@ -117,29 +120,52 @@ datatables_layout = row(
         edges_buttons
     ),
 )
-fcm_data_manager_layout = column(
-    separator(width=550, height=15),
-    uploadxlsx_layout,
-    separator(width=550, height=15),
-    datatables_layout,
-    separator(width=550, height=15),
-    save_bn,
-)
 
-fcm_display_layout = layout(
-    row(fcm_plot, Spacer(width=20, height=20), fcm_data_manager_layout)
-)
+nodes_dt_layout = layout(column(
+        nodes_data_table_title,
+        nodes_data_table,
+        node_buttons
+    ))
+nodes_dt_layout.name = "nodes_dataTable"
+
+edges_dt_layout = layout(column(
+        edges_data_table_title,
+        edges_data_table,
+        edges_buttons
+    ))
+edges_dt_layout.name = "edges_dataTable"
+
+
+
+
+
+
+
+
+# fcm_data_manager_layout = column(
+#     separator(width=550, height=15),
+#     uploadxlsx_layout,
+#     separator(width=550, height=15),
+#     datatables_layout,
+#     separator(width=550, height=15),
+#     save_bn,
+#     callback_holder
+# )
+
+# fcm_display_layout = layout(
+#     row(fcm_plot, Spacer(width=20, height=20), fcm_data_manager_layout)
+# )
 
 # Root (web page) layout:
-web_page_layout = column(
-    web_page_header,
-    separator(width=1500, height=15),
-    fcm_display_layout,
-    separator(width=1500, height=15),
-    fcmmc_layout,
-    separator(width=1500, height=15),
-    footer_layout,
-)
+# web_page_layout = column(
+#     web_page_header,
+#     separator(width=1500, height=15),
+#     fcm_display_layout,
+#     separator(width=1500, height=15),
+#     fcmmc_layout,
+#     separator(width=1500, height=15),
+#     footer_layout,
+# )
 
 # ---------------------------------------------------------------------
 # Attach callbacks on widgets    --------------------------------------
@@ -204,6 +230,13 @@ edges_CDS_changed_cb = partial(
     update_fcm_layout_dict, doc=current_doc, who='edgesCDS')
 current_doc.edges_CDS.on_change('data',edges_CDS_changed_cb)
 
+# Javascript Callback
+JScallback = CustomJS(code=open(join(dirname(__file__), "static\\js\\download.js")).read())
+callback_holder.js_on_change('text', JScallback)
+
+save_cb = partial(dict_to_js, doc=current_doc, cb_holder = callback_holder)
+save_bn.on_click(save_cb)
+
 # ---------------------------------------------------------------------
 # Initialize doc   ----------------------------------------------------
 # ---------------------------------------------------------------------
@@ -223,5 +256,13 @@ fcm_plot.renderers = [graph_renderer, labels_renderer]
 
 # Append web page layout to curent bokeh layout
 current_doc.add_root(web_page_layout)
+current_doc.add_root(fcm_plot)
+current_doc.add_root(uploadxlsx_layout)
+current_doc.add_root(nodes_dt_layout)
+current_doc.add_root(edges_dt_layout)
+current_doc.add_root(simulation_parameters_layout)
+current_doc.add_root(results_layout)
+
+current_doc.title = "In-cognitive: an FCM Simulator"
 # run bokeh server
 os.system('bokeh serve --show ./')

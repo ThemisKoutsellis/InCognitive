@@ -30,7 +30,7 @@ EXECUTION
 To run the application, the user needs only to execute the main.py
 module. The GUI provides all necessary interaction between the end-user
 and backend-code. 
-For further details see the manual here: https://github.com/ThemisKoutsellis/InCognitive/wiki/Manual
+For further details, see the manual here: https://github.com/ThemisKoutsellis/InCognitive/wiki/Manual
 
 
 REFERENCES

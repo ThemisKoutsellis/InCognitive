@@ -1,10 +1,11 @@
-THE IN-COGNITIVE APP:
+THE IN-COGNITIVE APP
 --------------------
 The InCognitive App provides a GUI and backend code for Fuzzy Cognitive
 Map (FCM) simulations.
 
-THE IN-COGNITIVE APP FUNCTIONALITIES:
--------------------------------------
+
+THE IN-COGNITIVE APP FUNCTIONALITIES
+------------------------------------
 - Deployment and graphical representation of a FCMs.
 
 - Selection of FCM-transfer-function's parameter lambda; it is based on
@@ -24,16 +25,16 @@ THE IN-COGNITIVE APP FUNCTIONALITIES:
   parameters (e.g. weights) are random variables.
 
 
-EXECUTION:
-----------
+EXECUTION
+---------
 To run the application, the user needs only to execute the main.py
 module. The GUI provides all necessary interaction between the end-user
 and backend-code. 
-For further details see: https://github.com/ThemisKoutsellis/InCognitive/wiki/Manual
+For further details see the manual here: https://github.com/ThemisKoutsellis/InCognitive/wiki/Manual
 
 
-REFERENCES:
------------
+REFERENCES
+----------
 [1] T. Koutsellis et al., "Parameter analysis for sigmoid and hyperbolic
 transfer functions of fuzzy cognitive maps," 2022, Oper Res Int J, 22,
 pp. 5733–5763, https://doi.org/10.1007/s12351-022-00717-x

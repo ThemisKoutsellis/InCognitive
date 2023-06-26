@@ -23,7 +23,7 @@ RUN pip install --upgrade pip \
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-ENV ORIGIN="incognitive.paris-reinforce.epu.ntua.gr" PORT="5006" PREFIX="" LOG_LEVEL="info"
+EXPOSE 5006
 
 COPY ./InCongnitiveApp /InCongnitiveApp
 ENTRYPOINT ["./entrypoint.sh"]

@@ -25,5 +25,5 @@ RUN chmod +x /entrypoint.sh
 
 ENV ORIGIN="incognitive.paris-reinforce.epu.ntua.gr" PORT="5006" PREFIX="" LOG_LEVEL="info"
 
-COPY ./InCongnitiveApp /app
+COPY ./InCongnitiveApp /InCongnitiveApp
 ENTRYPOINT ["./entrypoint.sh"]

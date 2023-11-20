@@ -4,4 +4,4 @@ if [ -z "${PREFIX}" ]; then
 else
     PREFIX_PARAM="--prefix ${PREFIX}";
 fi
-bokeh serve --port ${PORT} --address 0.0.0.0 --log-level ${LOG_LEVEL} --show /InCongnitiveApp
+bokeh serve --port 5006 --address 0.0.0.0 --show /InCongnitiveApp

@@ -289,6 +289,7 @@ lambda_autoselect_rb = CheckboxGroup(
 f1 = figure(
    x_range=[0, 1],
    y_range=FactorRange(),
+   frame_height=500,frame_width=900,
    height=500,width=900,
    title="Input nodes",
    toolbar_location='right',
@@ -305,6 +306,7 @@ f1.background_fill_alpha = 0.5
 f2 = figure(
     x_range=[0, 1],
     y_range=FactorRange(),
+    frame_height=500,frame_width=900,
     height=500,width=900,
     title="Intermediate nodes",
     toolbar_location='right',
@@ -321,6 +323,7 @@ f2.background_fill_alpha = 0.5
 f3 = figure(
     x_range=[0, 1],
     y_range=FactorRange(),
+    frame_height=500,frame_width=900,
     height=500,width=900,
     title="Output nodes",
     toolbar_location='right',

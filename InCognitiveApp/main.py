@@ -477,35 +477,6 @@ edges_dt_layout.name = "edges_dataTable"
 
 
 
-
-
-
-
-# fcm_data_manager_layout = column(
-#     separator(width=550, height=15),
-#     uploadxlsx_layout,
-#     separator(width=550, height=15),
-#     datatables_layout,
-#     separator(width=550, height=15),
-#     save_bn,
-#     callback_holder
-# )
-
-# fcm_display_layout = layout(
-#     row(fcm_plot, Spacer(width=20, height=20), fcm_data_manager_layout)
-# )
-
-# Root (web page) layout:
-# web_page_layout = column(
-#     web_page_header,
-#     separator(width=1500, height=15),
-#     fcm_display_layout,
-#     separator(width=1500, height=15),
-#     fcmmc_layout,
-#     separator(width=1500, height=15),
-#     footer_layout,
-# )
-
 # ---------------------------------------------------------------------
 # Attach callbacks on widgets    --------------------------------------
 # ---------------------------------------------------------------------

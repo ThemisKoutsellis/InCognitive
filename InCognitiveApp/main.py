@@ -351,12 +351,12 @@ simulation_parameters_layout = layout(
     input_nodes_layout,
     weights_layout,
     lambda_layout,
-    separator(width=550, height=15),
+    msg_div,
     execute_btn,
 )
 simulation_parameters_layout.name = "simulation_par"
 
-results_layout = layout(column(tabs, msg_div))
+results_layout = layout(column(tabs))
 results_layout.name = "results"
 
 uploadxlsx_layout = layout(row(column(upload_xlsx_wgt, excel_parse_msg_div),save_bn, callback_holder))

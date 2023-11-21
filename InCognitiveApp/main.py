@@ -574,5 +574,4 @@ current_doc.add_root(simulation_parameters_layout)
 current_doc.add_root(results_layout)
 
 current_doc.title = "InCognitive: an FCM Simulator"
-# run bokeh server
-# os.system('bokeh serve --show ./')
+

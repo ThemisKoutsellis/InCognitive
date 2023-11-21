@@ -41,4 +41,6 @@ pp. 5733–5763, https://doi.org/10.1007/s12351-022-00717-x
 
 [2] T. Koutsellis et al., "Normalising the Output of Fuzzy Cognitive Maps,"
 2022 13th International Conference on Information, Intelligence, Systems
-& Applications (IISA), 2022, pp. 1-7, doi: 10.1109/IISA56318.2022.9904369.
+& Applications (IISA), 2022, pp. 1-7, https://doi.org/10.1109/IISA56318.2022.9904369.
+
+[3] Koutsellis, T., Xexakis, G., Koasidis, K., Frilingou, N., Karamaneas, A., Nikas, A., & Doukas, H. (2023). In-Cognitive: A web-based Python application for fuzzy cognitive map design, simulation, and uncertainty analysis based on the Monte Carlo method. SoftwareX, 23, 101513. [https://doi.org/10.1016/j.softx.2023.101513](https://doi.org/10.1016/j.softx.2023.101513)

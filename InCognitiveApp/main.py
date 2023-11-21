@@ -28,6 +28,8 @@ from frontendcode.internal_functions import _update_graph_renderer
 # Session's variables   ------------------------------------------------
 # ---------------------------------------------------------------------
 
+curdoc().clear()
+
 # Assign the seesion vars to the current Doc
 current_doc = curdoc()
 
@@ -263,6 +265,6 @@ current_doc.add_root(edges_dt_layout)
 current_doc.add_root(simulation_parameters_layout)
 current_doc.add_root(results_layout)
 
-current_doc.title = "In-cognitive: an FCM Simulator"
+current_doc.title = "InCognitive: an FCM Simulator"
 # run bokeh server
-os.system('bokeh serve --show ./')
+# os.system('bokeh serve --show ./')

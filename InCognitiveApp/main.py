@@ -291,6 +291,7 @@ f1 = figure(
    x_range=[0, 1],
    y_range=FactorRange(),
    height=500,width=900,
+   frame_height=500,frame_width=900,
    title="Input nodes",
    toolbar_location='right',
    toolbar_sticky = False,
@@ -305,6 +306,7 @@ f2 = figure(
     x_range=[0, 1],
     y_range=FactorRange(),
     height=500,width=900,
+    frame_height=500,frame_width=900,
     title="Intermediate nodes",
     toolbar_location='right',
     toolbar_sticky = False,
@@ -319,6 +321,7 @@ f3 = figure(
     x_range=[0, 1],
     y_range=FactorRange(),
     height=500,width=900,
+    frame_height=500,frame_width=900,
     title="Output nodes",
     toolbar_location='right',
     toolbar_sticky = False,
@@ -375,11 +378,11 @@ simulation_parameters_layout = layout(
     input_nodes_layout,
     weights_layout,
     lambda_layout,
-    separator(width=550, height=15),
+    msg_div,
     execute_btn,
 )
 
-results_layout = layout(column(tabs, msg_div))
+results_layout = layout(column(tabs))
 
 fcmmc_layout = row(
     simulation_parameters_layout,

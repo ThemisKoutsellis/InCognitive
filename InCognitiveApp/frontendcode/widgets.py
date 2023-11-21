@@ -58,7 +58,7 @@ PARIS_REINFORCE_COLOR = '#2f2f2f'
 # Header Div:
 # web_page_header = Div(
 #     text=("<figure>"
-#           "<img src='InCongnitiveApp/static/images/InCognitive2.png' "
+#           "<img src='InCognitiveApp/static/images/InCognitive2.png' "
 #           "width='650' height='100' "
 #           "alt='FCM Simulation application'"
 #           "</figure>"

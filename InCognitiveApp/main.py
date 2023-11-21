@@ -28,7 +28,6 @@ from frontendcode.internal_functions import _update_graph_renderer
 # Session's variables   ------------------------------------------------
 # ---------------------------------------------------------------------
 
-import pdb;pdb.set_trace()
 # Assign the seesion vars to the current Doc
 current_doc = curdoc()
 

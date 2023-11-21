@@ -25,5 +25,5 @@ RUN chmod +x /entrypoint.sh
 
 EXPOSE 5006
 
-COPY ./InCongnitiveApp /InCongnitiveApp
+COPY ./InCognitiveApp /InCognitiveApp
 ENTRYPOINT ["./entrypoint.sh"]
